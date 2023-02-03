@@ -55,6 +55,11 @@ class SetsInterf extends Component {
           <SetsInput aguard={intInEmiter} label='Max' numb='345' name='max' 
           onInpValueText={this.testEventFromInp}
           scp={scopeInSets} />
+        {/*  <fieldset>
+            <legend style={styleSets.legend}>Enter temperature in :</legend>
+            <TextInput value='100' style={styleSets.input}
+                    />
+          </fieldset>*/}
            
         </View>         
         <View  style={styleSets.block2}>          
@@ -99,7 +104,7 @@ const SetsInput = (props) => {
 
   return (
     <SafeAreaView>  
-      <Text>{props.label}  </Text> 
+      <Text style={styleSets.inputLegend}>{props.label}  </Text> 
       <TextInput        
           style={styleSets.input}
           onChangeText={doroy}
@@ -173,7 +178,7 @@ const ChoiseInput = (props) => {
 const styleSets = StyleSheet.create({
   cont: {
     width:'100%',
-    height:'90%',
+    height:'100%',
     // flex: 1,
     // backgroundColor: '#fff',
     // alignItems: 'center',
@@ -191,14 +196,20 @@ const styleSets = StyleSheet.create({
     width:'100%',
     height:'27%',
   },
+  inputLegend:{
+    fontWeight: 'bold',
+    color: '#945454' /*'#fff'*/,
+  },
   input: {
     color: '#fff',
     height: 40,
     width: 120,
     margin: 12,
+    borderColor: '#945454' /*'#fff'*/,
     borderWidth: 1,
     padding: 10,
     fontWeight: 'bold',
+    marginTop:0,
   },
   sets_cont: {
     width:'100%',
@@ -219,14 +230,20 @@ const styleSets = StyleSheet.create({
     alignItems: 'center',
     height:40,    
     width:200,
-    backgroundColor: '#777',
-    marginTop:10,
+    // backgroundColor: '#777',
+    backgroundColor: '#945454',
+    // marginTop:10,
+    marginBottom:10,
   },
   choisetext:{
     color: '#fff',
     // fontSize: 13,
     fontWeight: 'bold',
   },
+  legend:{
+    fontWeight: 'bold',
+    // font:' 14px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+  }
 });
 
 export default SetsInterf; // Don’t forget to use export default!

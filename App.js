@@ -1,19 +1,16 @@
 import { StatusBar } from 'expo-status-bar';
-// import { registerRootComponent } from 'expo';
-import { StyleSheet, Text, View, Pressable, TextInput, SafeAreaView } from 'react-native';
-// import { createRoot } from 'react-dom/client';
+import { StyleSheet, Text, View, Pressable, TextInput, SafeAreaView, Dimensions, Image } from 'react-native';
 import React, { useState, useEffect, Component } from 'react';
-// import React, { Component } from "react";
-import Button from './component';
-import SetsInterf from './sets_inputs';
+import Button from './modules/mainScreenBlock';
+import SetsInterf from './modules/settingsInputs';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-let intEmiter = require('./lessonGenerator').interfaceEmitter;
-let lsEmiter = require('./lessonGenerator').localStorEmitter;
-let scopeSets = require('./lessonGenerator').scope;
+let intEmiter = require('./modules/lessonGenerator').interfaceEmitter;
+let lsEmiter = require('./modules/lessonGenerator').localStorEmitter;
+let scopeSets = require('./modules/lessonGenerator').scope;
 
-let emiter = require('./gsheetData').myEmitter;
+let emiter = require('./modules/gsheetData').myEmitter;
 
 
 emiter.on('gsheet words', (msg) => {
@@ -21,6 +18,9 @@ emiter.on('gsheet words', (msg) => {
   storeData('dictionary', msg)
   // localStorage.setItem('dictionary', msg);  
 });
+
+const heightX = Dimensions.get('screen').height;
+// console.log(height, width)
 
 const data = {
   dictionary: [
@@ -203,6 +203,8 @@ class Setst extends Component {
   constructor (props){
     super(props)
     this.handEvenPrs = this.handEvenPrs.bind(this);
+    
+    // this.hehe = height
   }
 
   handEvenPrs(e){
@@ -215,13 +217,17 @@ class Setst extends Component {
       style={styles.prsbl}
       onPress={this.handEvenPrs}>    
         <View style={styles.link}>
-        <Text>{/*настройки*/}</Text>
+        <Image source={require('./assets/sets_star.png')} style={{width: 40, height: 40, marginLeft: 10}} />
+        <Text>{/*{heightX}*/}</Text>
         </View>  
       </Pressable>   
       //</View> 
     )
   }
 }
+
+const newHe = (heightX - 100)
+console.log(heightX)
 
 const styles = StyleSheet.create({
   container: {
@@ -233,9 +239,13 @@ const styles = StyleSheet.create({
     // justifyContent: 'center',
   },  
   sets_cont: {
-    width:'100%',
-    height:'10%',
-    flexDirection: "row",    
+    width:70,
+    height:70,
+    flexDirection: "row", 
+    position: 'absolute', 
+    marginTop: 50/*newHe*/,
+    // bottom:'0',
+    // zIndex: '50', 
   },
   la: {
     height:'33.33%',
@@ -246,24 +256,24 @@ const styles = StyleSheet.create({
     backgroundColor: '#6c1515bb'
   },
   ne: {
-    height:'23.33%',
+    height:'33.33%',
     backgroundColor: '#5e4a20bb'
   },
   bottom: {
     main:{
-      backgroundColor: '#5e4a20bb'
+      // backgroundColor: '#5e4a2000'
     },
     sets: {
-      backgroundColor: '#6c1515bb'
+      // backgroundColor: '#6c1515bb'
     }    
   },
   link: {
     width:"100%",
     height:"100%",
-    backgroundColor: '#777',
+    // backgroundColor: '#777',
   },
   prsbl: {
-    width:'20%',
+    width:'100%',
     height:'100%',
   },
 });
