@@ -23,8 +23,11 @@ async function funcFunc(lang_c){
     //console.log(datsss);
     good = 'new data'
     myEmitter.emit('gsheet words', datsss);
+    return datsss
   } catch {
     console.log("Error");
+    // return throw Error
+    throw new Error('gSheet connection')
   }
 }
 
@@ -33,11 +36,23 @@ myEmitter.on('gsheetwordsupd', async (lang) =>{
   funcFunc(lang)
 })
 
+function promiseDataGsheet (lang){
+  return new Promise((resolve, reject) => {
+    try{
+      const res = funcFunc(lang)      
+      resolve(res)
+    }catch (err){
+      reject(err)
+    }
+  })
+}
+
 
 module.exports = {
   Hello:"hello",
   news: good,
-  myEmitter: myEmitter
+  myEmitter: myEmitter,
+  promiseDataGsheet: promiseDataGsheet,
 }
 
 // module.exports.myEmitter = myEmitter

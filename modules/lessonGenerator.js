@@ -1,44 +1,30 @@
 const EventEmitter = require('events');
 const interfaceEmitter = new EventEmitter();
-const localStorEmitter = new EventEmitter();
+// const localStorEmitter = new EventEmitter();
 //------------------------------------------------------------------------------------------------------------------script
-
+import { sendScope } from './updateStateController';
 
 let scope = {}
 let isScopeSet = false
 let isHideTransl = false
 
 function updateScope () {
-  localStorEmitter.emit('updScope','uh')
+  // localStorEmitter.emit('updScope','uh')
+  sendScope().then((msg)=>{ 
+    // console.log(msg.ms1, msg.ms2)
+    scope.dict = JSON.parse(msg.ms1)
+    scope.sets = JSON.parse(msg.ms2)
+    console.log('scopeUpdated')
+    isScopeSet = true
+    interfaceEmitter.emit('loadLessn')
+  })
 }
-
-localStorEmitter.on('scopeUpdated',(msg, msg2) => {
-  scope.dict = JSON.parse(msg)
-  scope.sets = JSON.parse(msg2)
-  console.log('scopeUpdated')
-  isScopeSet = true
-  interfaceEmitter.emit('loadLessn')
-})
-
-function setLocalStorScope (key, val) {
-  localStorEmitter.emit('setSets', key, val)
-}
-// updateScope()
 
 
   let words = [{la: "말이 없습니다", tr: "no words", co: "mal-i eobs-seubnida"}]
   let taps = []
   let col_gl_taps = 0
-  // let socket = io();
-  // socket.emit('refresh words', JSON.parse(localStorage.getItem('settings')).current_lang);
 
-
-// document.getElementById("lang").innerHTML = words[0].la
-// localStorage.setItem('settings', JSON.stringify({current_lang:"kor"})); 
-
-// document.getElementsByClassName("lang_b")[0].addEventListener("click", add_taps)
-// document.getElementsByClassName("tran_b")[0].addEventListener("click", add_taps)
-// document.getElementsByClassName("next_b")[0].addEventListener("click", next_taps)
 interfaceEmitter.on('resp1', (msg) => {
   try { 
     isScopeSet && add_taps()
@@ -80,29 +66,40 @@ interfaceEmitter.on('resp1', (msg) => {
 })
 
 
-//-----Korean-----
-function genJakubovichFieldKor(taps, lang_word){
+
+function genRandomChunksFieldKor(taps, lang_word){//-----Korean-----
   let taps_arr = []
-  let taps_ind = []
-  let max = 0
-  // console.log(lang_word)
   for (var i = 0; i < lang_word.length; i++) {
     taps_arr.push(Math.random())/* = Math.random()*/
   }
+  return toSequenceShowingPartsOfWords(taps_arr)
+}
+function genRandomChunksFieldEng(taps, lang_word){//-----English-----
+  let taps_arr = []
+  for (var i = 0; i < Math.ceil(lang_word.length / 3); i++) {
+    taps_arr.push(Math.random())/* = Math.random()*/
+  }
+  return toSequenceShowingPartsOfWords(taps_arr)
+}
+function toSequenceShowingPartsOfWords(taps_arr){
+  let max = 0
+  let taps_ind = []
+  // console.log(taps_arr)
   for (var i = 0; i < taps_arr.length; i++) {
     max = Math.max(...taps_arr)
     taps_ind[i] = taps_arr.indexOf(max);
     taps_arr[taps_ind[i]] = 0
   }
+  // console.log(taps_arr, taps_ind)
   return taps_ind
 }
 
-//-----Korean-----
-function showCharactersByTapsKor(col_taps_ent, taps_array, init_word){
-  //hide characters if no one touch, shift showing at one touch 
+
+function symbolChange (symbol,  col_taps_ent, init_word){
+    //hide characters if no one touch, shift showing at one touch 
   if (col_taps_ent == 0) return ' '
 
-  col_taps = col_taps_ent - 1
+  let col_taps = col_taps_ent - 1
 
   if(col_taps >= init_word.length /*+ 1*/) col_taps = init_word.length /*+ 1 */// //add shift +1 for hide '-' characters 
   let crop_word = ''  
@@ -110,45 +107,19 @@ function showCharactersByTapsKor(col_taps_ent, taps_array, init_word){
     if(init_word[i] == ' ')
       crop_word += ' '
     else      
-      crop_word += 'ㅡ'       
+      crop_word += symbol       
   }
+  return {col_taps, crop_word}
+}
+function showCharactersByTapsKor(col_taps_ent, taps_array, init_word){ //-----Korean-----
+  let {col_taps, crop_word} = symbolChange ('ㅡ',  col_taps_ent, init_word)
   for (var i = 0; i < col_taps; i++) {    
     crop_word = crop_word.substring(0,taps_array[i]) + init_word.substring(taps_array[i],taps_array[i]+1) + crop_word.substring(taps_array[i]+1) 
   }
   return crop_word
 }
-
-//-----English-----
-function genJakubovichFieldEng(taps, lang_word){
-  let taps_arr = []
-  let taps_ind = []
-  let max = 0
-  for (var i = 0; i < Math.ceil(lang_word.length / 3); i++) {
-    taps_arr.push(Math.random())/* = Math.random()*/
-  }
-  for (var i = 0; i < taps_arr.length; i++) {
-    max = Math.max(...taps_arr)
-    taps_ind[i] = taps_arr.indexOf(max);
-    taps_arr[taps_ind[i]] = 0
-  }
-  return taps_ind
-}
-
-//-----English-----
-function showCharactersByTapsEng(col_taps_ent, taps_array, init_word){
-  //hide characters if no one touch, shift showing at one touch 
-  if (col_taps_ent == 0) return ' '
-
-  col_taps = col_taps_ent - 1 //3
-
-  if(col_taps >= init_word.length /*+ 1*/) col_taps = init_word.length /*+ 1 */// //add shift +1 for hide '-' characters 
-  let crop_word = ''  
-  for (var i = 0; i < init_word.length; i++) {
-    if(init_word[i] == ' ')
-      crop_word += ' '
-    else
-      crop_word += '-'
-  }
+function showCharactersByTapsEng(col_taps_ent, taps_array, init_word){ //-----English-----
+  let {col_taps, crop_word} = symbolChange ('-',  col_taps_ent, init_word)
   for (var i = 0; i < col_taps; i++) {    
     crop_word = crop_word.substring(0,taps_array[i]*3) + init_word.substring(taps_array[i]*3,taps_array[i]*3+3) + crop_word.substring(taps_array[i]*3+3) 
   }
@@ -158,7 +129,7 @@ function showCharactersByTapsEng(col_taps_ent, taps_array, init_word){
 
 let gen = []
 let ini = ''
-let wrd = ''
+let wrdGlob = ''
 let commnt = ''
 let max_train = 0
 let min_train = 0
@@ -175,24 +146,19 @@ function showAllById(id = 0){
   commnt = words[id].co
   console.log(ini)
   if (settings.current_lang == "kor"){
-    gen = genJakubovichFieldKor("taps", ini)
-    wrd = showCharactersByTapsKor(col_gl_taps, gen, ini)
+    gen = genRandomChunksFieldKor("taps", ini)
+    wrdGlob = showCharactersByTapsKor(col_gl_taps, gen, ini)
   } else {
-    gen = genJakubovichFieldEng("taps", ini)
-    wrd = showCharactersByTapsEng(col_gl_taps, gen, ini)
+    gen = genRandomChunksFieldEng("taps", ini)
+    wrdGlob = showCharactersByTapsEng(col_gl_taps, gen, ini)
   }
-  // document.getElementById("lang").innerHTML = wrd//words[id].la
-  // document.getElementById("tran").innerHTML = words[id].tr  
-  // document.getElementById("comm").innerHTML = ''
   if(isHideTransl){
-    interfaceEmitter.emit('shtwords1lang', wrd)
+    interfaceEmitter.emit('shtwords1lang', wrdGlob)
     interfaceEmitter.emit('shtwords2tran', words[id].tr)
   } else {
-    interfaceEmitter.emit('shtwords2tran', wrd)
+    interfaceEmitter.emit('shtwords2tran', wrdGlob)
     interfaceEmitter.emit('shtwords1lang', words[id].la)
-  }
-  
-  
+  }    
 }
 
 function loadNewLesson(){
@@ -255,14 +221,14 @@ let objIndProb = []
 let onceCall = true
 
 function generateArrProbability(ind, len){
-  x = (ind - 7) / 100 
-  y = 9 * ( Math.pow(2.71,(-1*x + 0.7)) ) * Math.cos((4*x + 5)) * Math.cos((4*x + 1.35))  // 7 good piks on interval (-0.5; 5)
+  let x = (ind - 7) / 100 
+  let y = 9 * ( Math.pow(2.71,(-1*x + 0.7)) ) * Math.cos((4*x + 5)) * Math.cos((4*x + 1.35))  // 7 good piks on interval (-0.5; 5)
   return y
 }
 
 
 function generProbabilityPlotObj(len){
-  arrXpoints2 = new Array(len).fill(0)
+  let arrXpoints2 = new Array(len).fill(0)
   //let arrXpoints2 = [...arrXpoints]
   arrXpoints2 = arrXpoints2.slice(0, 500)
   for (var i = 0; i < arrXpoints2.length; i++) {
@@ -317,37 +283,37 @@ function teachRandom(min, max){
 
 
 function add_taps(){
-  // console.log("huek")
+
   if (/*JSON.parse(localStorage.getItem('settings'))*/scope.sets.current_lang == "kor"){
     
     // if(isHideTransl){
       col_gl_taps++
-      wrd = showCharactersByTapsKor(col_gl_taps, gen, ini)
+      wrdGlob = showCharactersByTapsKor(col_gl_taps, gen, ini)
     // } else {
     //   col_gl_taps++
-    //   wrd = showCharactersByTapsEng(col_gl_taps, gen, ini)      
+    //   wrdGlob = showCharactersByTapsEng(col_gl_taps, gen, ini)      
     // }
   }
   else {
     //col_gl_taps+=3
     col_gl_taps++
-    wrd = showCharactersByTapsEng(col_gl_taps, gen, ini)
+    wrdGlob = showCharactersByTapsEng(col_gl_taps, gen, ini)
   }
 
   
-  // document.getElementById("lang").innerHTML = wrd
+  // document.getElementById("lang").innerHTML = wrdGlob
 
   if(isHideTransl){
-    interfaceEmitter.emit('shtwords1lang', wrd)
+    interfaceEmitter.emit('shtwords1lang', wrdGlob)
   } else {
-    interfaceEmitter.emit('shtwords2tran', wrd)
+    interfaceEmitter.emit('shtwords2tran', wrdGlob)
   }
   // 
   
 
-  //console.log(col_gl_taps, wrd.length)
-  // console.log(col_gl_taps, wrd.length)
-  if(col_gl_taps >= wrd.length + 1){ //add shift +1 for hide '-' characters 
+  //console.log(col_gl_taps, wrdGlob.length)
+  // console.log(col_gl_taps, wrdGlob.length)
+  if(col_gl_taps >= wrdGlob.length + 1){ //add shift +1 for hide '-' characters 
     if (/*JSON.parse(localStorage.getItem('settings'))*/scope.sets.current_lang == "kor")
       //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!   document.getElementById("comm").innerHTML = "(" + commnt + ")"
     console.log("commnt")
@@ -359,46 +325,10 @@ function next_taps(){
   loadNewLesson();
 }
 
-// try{
-//   loadNewLesson();
-// }catch(e){
-//   console.log(e)
-// }
 
 
-
-//------------------------------------------------------------------------------------------------------------------script
-
-
-
-// let good = 'norm'
-
-// async function func(){
-
-//   try {
-//     let data = await fetch(
-//       "https://sheets.googleapis.com/v4/spreadsheets/1csysK6t9agb7WFohdAKFcZUbACvZ3-qN8fhapcJtYYg/values/Kor_list?valueRenderOption=FORMATTED_VALUE&key=AIzaSyCWFhSQBc5xjNZyj8OEth3P9ZWNg83HDwo"
-//     );
-//     let { values } = await data.json();
-//     let [, ...Data] = values.map((data) => data);
-//     //return Data;
-//     let datsss = JSON.stringify(Data).slice(0, 200)
-//     console.log(datsss);
-//     good = 'new data'
-//     myEmitter.emit('gsheet words', datsss);
-//   } catch {
-//     console.log("Error");
-//   }
-// }
-
-// func()
-
-module.exports = {
-  // Hello:"hello",
-  // news: good,
-  interfaceEmitter: interfaceEmitter,
-  localStorEmitter: localStorEmitter,
-  scope: () => {return scope.sets},
-}
+const scopeSetts = () => {return scope.sets}
 
 // module.exports.myEmitter = myEmitter
+
+export {/*localStorEmitter, */interfaceEmitter, scopeSetts}
