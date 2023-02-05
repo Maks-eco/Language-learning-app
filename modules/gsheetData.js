@@ -6,7 +6,7 @@ let good = 'norm'
 async function funcFunc(lang_c){
 
   try {
-    console.log(lang_c)
+    // console.log(lang_c)
     const lang = (lang_c == 'kor') ? 'Kor_list' : 'Eng_list'
     let data = await fetch(
       `https://sheets.googleapis.com/v4/spreadsheets/1csysK6t9agb7WFohdAKFcZUbACvZ3-qN8fhapcJtYYg/values/${lang}?valueRenderOption=FORMATTED_VALUE&key=AIzaSyCWFhSQBc5xjNZyj8OEth3P9ZWNg83HDwo`
@@ -18,6 +18,7 @@ async function funcFunc(lang_c){
     Data.forEach((row) => {
       arr_la_tr_co.push({la:row[0],tr:row[1],co:row[2]})
     });
+    // console.log(arr_la_tr_co[0])
   // return arr_la_tr_co
     let datsss = JSON.stringify(arr_la_tr_co)//.slice(0, 200)
     //console.log(datsss);
@@ -32,7 +33,7 @@ async function funcFunc(lang_c){
 }
 
 myEmitter.on('gsheetwordsupd', async (lang) =>{
-  console.log(lang)
+  // console.log(lang)
   funcFunc(lang)
 })
 
@@ -51,7 +52,7 @@ function promiseDataGsheet (lang){
 module.exports = {
   Hello:"hello",
   news: good,
-  myEmitter: myEmitter,
+  // myEmitter: myEmitter,
   promiseDataGsheet: promiseDataGsheet,
 }
 

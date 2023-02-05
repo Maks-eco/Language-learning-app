@@ -13,7 +13,7 @@ const getData = async (key) => {
     // const value = getDataPlug(key)
     const value = await AsyncStorage.getItem(key /*'@storage_Key'*/)
     if(value !== null) {
-      console.log('value imported!')
+      // console.log('value imported!')
       return value
     }
   } catch(e) {

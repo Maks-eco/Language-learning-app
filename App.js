@@ -5,11 +5,11 @@ import Button from './modules/mainScreenBlock';
 import SetsInterf from './modules/settingsInputs';
 
 
-// let intEmiter = require('./modules/lessonGenerator').interfaceEmitter; //only mainblock 'event tap' & 'event change value'
-// let scopeSets = require('./modules/lessonGenerator').scope; // => only get settings value localStore 
+// let intEmiter = require('./modules/lessonGenerator').interfaceEmitter; 
+// let scopeSets = require('./modules/lessonGenerator').scope; 
 import {interfaceEmitter, scopeSetts} from './modules/lessonGenerator'
-let intEmiter = interfaceEmitter
-let scopeSets = scopeSetts
+let intEmiter = interfaceEmitter //only mainblock 'event tap' & 'event change value'
+let scopeSets = scopeSetts // => only get settings value localStore 
 
 import { sendScopeSettings } from './modules/updateStateController'; // <= only set settings value localStore 
 
