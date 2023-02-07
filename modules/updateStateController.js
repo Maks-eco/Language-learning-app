@@ -39,10 +39,8 @@ async function init(){
     .catch(e => {
       // console.log(e.name)
       storeData('settings', JSON.stringify(dataGlobSettings  ))
-        .then(()=>{
-          storeData('dictionary', JSON.stringify(dataGlobDictionary  ))
-        })
-        .then(()=>{
+        .then(()=>  storeData('dictionary', JSON.stringify(dataGlobDictionary  )))        
+        .then(()=> {
           console.log('secnd attempt')
           init()
         })      
@@ -57,46 +55,32 @@ function sendScope(){
       //ert(),
       getData('dictionary'), 
       getData('settings')
-    ]).then(results => {
+    ])
+    .then(results => {
       dataGlobDictionary = JSON.parse( results[0])
       dataGlobSettings = JSON.parse( results[1])
       // console.log(dataGlobSettings)
        resolve({dict: results[0], sets: results[1]})
-    }).catch(e => {
-      console.log(e)
+    })
+    .catch(() => {
+      // console.log(e)
       storeData('dictionary', JSON.stringify(dataGlobDictionary /*dataGlob.dictionary */))
-      .then(() => {
-        storeData('settings', JSON.stringify(dataGlobSettings /*dataGlob.settings*/ ))
-      })
-      .then(() =>   sendScope() )
-      .then(results => {
-        console.log('double rebuilded')
-        resolve(results)
-      })
-      // setTimeout(()=>{
-
-      //   sendScope()
-      // }, 1000)
-
+        .then(() => {
+          storeData('settings', JSON.stringify(dataGlobSettings /*dataGlob.settings*/ ))
+        })
+        .then(() =>   sendScope() )
+        .then(results => {
+          console.log('double rebuilded')
+          resolve(results)
+        })
     })
   })
 }
 
 
-/*async*/ function sendScopeSettings(e){ //get data from input element from settings, then save it in localStorage
+function sendScopeSettings(e){ //get data from input element from settings, then save it in localStorage
    // console.log(e)
-   storeData('settings', e).then(()=>{
-    // dataGlobSettings = JSON.parse(e)
-    init()
-   })
-    // sendScope().then(()=>{
-    //   console.log('Bun in oven 2')
-    //   return init()
-    // }).then(()=>{
-    //   sendScope()
-    // }).then(()=>{
-    //   console.log('Zapecheno 2')
-    // }).catch((e)=>{console.log(e)})
+  storeData('settings', e).then(() => init()  )
 }
 
 export { sendScopeSettings, sendScope }

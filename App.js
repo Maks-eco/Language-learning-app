@@ -4,23 +4,13 @@ import React, { useState, useEffect, Component } from 'react';
 import Button from './modules/mainScreenBlock';
 import SetsInterf from './modules/settingsInputs';
 
-
-// let intEmiter = require('./modules/lessonGenerator').interfaceEmitter; 
-// let scopeSets = require('./modules/lessonGenerator').scope; 
 import {interfaceEmitter, scopeSetts} from './modules/lessonGenerator'
 let intEmiter = interfaceEmitter //only mainblock 'event tap' & 'event change value'
 let scopeSets = scopeSetts // => only get settings value localStore 
 
 import { sendScopeSettings } from './modules/updateStateController'; // <= only set settings value localStore 
 
-
 const heightX = Dimensions.get('screen').height;
-
-
-function getDataPlug(key){
-  
-  return JSON.stringify(data[key])
-}
 
 class App extends Component {
   constructor (props){
@@ -29,26 +19,19 @@ class App extends Component {
       page: /*'sets'*/ 'main' //'empt inpt'
     };
     this.setsInterfFromInp = this.setsInterfFromInp.bind(this);
-    // this.setsInterfFromChoi = this.setsInterfFromChoi.bind(this);
     this.changePage = this.changePage.bind(this);
-    // props.aguard.on(props.msg_in, (msg) => {
-    //   this.setState({ comments: msg })     
-    // })
   }
   componentDidMount() {
     // this.props.aguard.emit('attch', 'attch')
   }
   setsInterfFromInp(e){
-    /*return*/ sendScopeSettings(e)
-
+    sendScopeSettings(e)
   }
-
 
   changePage(e){
     console.log((this.state.page ==='sets') ? 'main' : 'sets')
     this.setState({ page: (this.state.page ==='sets') ? 'main' : 'sets'}) 
   }
-
 
   render (){
     if(this.state.page == 'main'){
@@ -91,8 +74,6 @@ class UpdView extends Component {
     this.props.aguard.emit('attch', 'attch')
   }
   componentWillUnmount() {
-  //   this.props.aguard.off(this.props.msg_out, () => {return true})
-    // this.props.aguard.removeAllListeners('attch');
   }
   render (){
     return (            
@@ -105,9 +86,7 @@ class UpdView extends Component {
 class Setst extends Component {
   constructor (props){
     super(props)
-    this.handEvenPrs = this.handEvenPrs.bind(this);
-    
-    // this.hehe = height
+    this.handEvenPrs = this.handEvenPrs.bind(this);    
   }
 
   handEvenPrs(e){
