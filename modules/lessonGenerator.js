@@ -1,12 +1,11 @@
 const EventEmitter = require('events');
 const interfaceEmitter = new EventEmitter();
-// const localStorEmitter = new EventEmitter();
-//------------------------------------------------------------------------------------------------------------------script
+
 import { sendScope, dataGlobDictionary, dataGlobSettings } from './updateStateController';
 
-// let isScopeSet = true
 let objIndProbGlobal = []
 let onceCall = true
+const UNREPEAT_LENGTH = 6
 
 function updateScope () {  
   sendScope().then(()=>{
@@ -16,10 +15,6 @@ function updateScope () {
     objIndProbGlobal = generProbabilityPlotObj(trainMax > dictLen ? dictLen : trainMax)
     
     loadNewLesson() 
-    // if(isScopeSet){
-    //   loadNewLesson() 
-    //   isScopeSet = false      
-    // }
   })
 }
 
@@ -38,6 +33,8 @@ interfaceEmitter
   }
 }).on('resp3', (msg) => { 
   try {  
+    // console.log(dataGlobSettings)  
+    // console.log(dataGlobDictionary)
     loadNewLesson()    
   } catch(e) {
     console.log(e)
@@ -45,8 +42,18 @@ interfaceEmitter
 }).on('attch', (msg) => {
   try {
     console.log('attch: ' + msg);   
+    // console.log(dataGlobSettings)  
+    // console.log(dataGlobDictionary)
     loadNewLesson()
     updateScope()
+
+  } catch(e) {
+    console.log(e)
+  }
+}).on('getPlot', (msg) => { 
+  try {  
+    console.log('reparePropabilityVisualisation(msg)',msg)
+    interfaceEmitter.emit('getPlotReturn', preparePropabilityVisualisation(msg))    
   } catch(e) {
     console.log(e)
   }
@@ -65,13 +72,11 @@ function genRandomChunksField(lang_word, currentLang){
 function toSequenceShowingPartsOfWords(tpsArr){
   let max = 0
   let tapesInd = []
-  // console.log(tpsArr)
   for (var i = 0; i < tpsArr.length; i++) {
     max = Math.max(...tpsArr)
     tapesInd[i] = tpsArr.indexOf(max);
     tpsArr[tapesInd[i]] = 0
   }
-  // console.log(tpsArr, tapesInd)
   return tapesInd
 }
 
@@ -123,15 +128,11 @@ function addInitTapUnhide(){
     if(id){
       isHideTransl = hideTranslChoise(dataGlobSettings.hide)
       numbGlobTaps = 0   
-      // try{     
+      
       iniGlobHiddenWord = (isHideTransl) ? wordsArrayGlob[id].la : wordsArrayGlob[id].tr
       iniGlobOpendWord = (!isHideTransl) ? wordsArrayGlob[id].la : wordsArrayGlob[id].tr
       commnt = wordsArrayGlob[id].co
-// }catch(e){
-//   console.log(objIndProbGlobal)
-//   console.log(id)
-//   console.log(e)
-// }
+
       if (dataGlobSettings.current_lang == "kor"){
         genGlob = genRandomChunksField( iniGlobHiddenWord, (isHideTransl) ? 'kor' : 'eng')
       } else {
@@ -155,11 +156,16 @@ function addInitTapUnhide(){
     }
     
     if(!id){
-      if(numbGlobTaps >= wrdSemihiddenGlob.length + 1){ //add shift +1 for hide '-' characters 
-        if (dataGlobSettings.current_lang == "kor")
-          //!!!!!!!!!!!!!!! document.getElementById("comm").innerHTML = "(" + commnt + ")"
-        console.log("commnt")
+      let tapsWrd
+      if(dataGlobSettings.current_lang == "kor" && isHideTransl)
+        tapsWrd = wrdSemihiddenGlob.length + 1 
+      else
+      tapsWrd = Math.ceil((wrdSemihiddenGlob.length/ 3 + 1) )
+      if(numbGlobTaps > tapsWrd){ 
+        // console.log("commnt " + (commnt ? commnt : ' '))
+        interfaceEmitter.emit('shtwords2trancom', commnt ? `(${commnt})` : ' ')
       }
+      let x =0 
     }
   }
 }
@@ -169,39 +175,24 @@ const addTapUnhide = addInitTapUnhide()
 
 function hideTranslChoise(hideParam){
   // console.log(hideParam)
-  if(hideParam == 1){
+  if(hideParam == 'rus'/*1*/){
     return false
   }
-  if(hideParam == 2){
+  if(hideParam == 'bth'/*2*/){
     return (Math.random() > 0.5) ? false : true
   }
   return true
 }
 
-// function settingInitAndSwitchAtCurrentLang(){ 
-
-//   let setsCurLang = dataGlobSettings.current_lang
-//   // console.log( setsCurLang)
-//   if(setsCurLang == 'eng'){
-//     return dataGlobSettings.eng    
-//   }
-//   // 'kor' or default:
-//   return dataGlobSettings.kor 
-// }
 
 function loadNewLesson(){
   let max_train = 0
-  // let min_train = 0
-  // hideTranslChoise(dataGlobSettings.hide)
-  // let sets = settingInitAndSwitchAtCurrentLang()
-
   max_train = dataGlobSettings[dataGlobSettings.current_lang].max // sets.max
-  // min_train = sets.min
-  // console.log( max_train)
+
   if(max_train > (dataGlobDictionary.length - 1)) {
     max_train = dataGlobDictionary.length - 1
   }
-  addTapUnhide(randomChoiseFromPlotObj(max_train) /*teachRandom(min_train,max_train)*/)
+  addTapUnhide(randomChoiseFromPlotObj(max_train) )
 }
 
 
@@ -219,13 +210,49 @@ function generProbabilityPlotObj(len){
   arrXpoints2 = arrXpoints2.slice(0, 500)
   for (var i = 0; i < arrXpoints2.length; i++) {
     arrXpoints2[i] = generateArrProbability(i, arrXpoints2.length)
-    if (arrXpoints2[i] < 0) arrXpoints2[i] = 0
+    if (arrXpoints2[i] < 0.03) arrXpoints2[i] = 0
       else objBufIndProb.push({ind: i, prob: arrXpoints2[i]})
   }
 // const objBufIndProb2 = objBufIndProb.slice(0, 500)
   return  objBufIndProb
 }
 
+function preparePropabilityVisualisation(len){
+  const probArr = generProbabilityPlotObj(len)
+  const divArr = []
+  let newGroupIndex = 0
+
+  for (var i = 0; i < probArr.length; i++) {
+    probArr[i].ind = len - probArr[i].ind // - 1
+  }
+
+  // console.log(probArr)
+  divArr.push([])
+  // probArr[0].ind = reLen(probArr[0].ind)
+  divArr[newGroupIndex].push(probArr[0])
+  for (var i = 1; i < probArr.length; i++) {
+    let buf = JSON.parse(JSON.stringify(probArr[i]))
+    if (probArr[i].ind  == probArr[i - 1].ind - 1){
+      // buf.ind = reLen(probArr[i].ind)
+      divArr[newGroupIndex].push(buf)
+    }else{
+      divArr.push([])
+      newGroupIndex++
+      // buf.ind = reLen(probArr[i].ind)
+      divArr[newGroupIndex].push(buf)
+    }
+  }
+  // for (var i = 0; i < divArr.length; i++) {
+  //   divArr[i] = len - divArr[i] - 1
+  // }
+  // console.log(divArr)
+  return divArr
+
+  function reLen(ind){
+    return len - ind - 1
+  }
+}
+preparePropabilityVisualisation(200)
 
 
 function randomChoiseFromPlotObj(len){
@@ -258,13 +285,22 @@ function randomChoiseFromPlotObj(len){
 
 function chechIndexBy(){
   let exArr = []
+  let maxCall = 0
   return (ind_arr) => {
-    // console.log(exArr)
+    maxCall++
+    if(maxCall > 100) exArr = []
+    const dictLen = dataGlobDictionary.length - 1
+    const trainMax = dataGlobSettings[dataGlobSettings.current_lang].max
+    // objIndProbGlobal = generProbabilityPlotObj(trainMax > dictLen ? dictLen : trainMax)
+    const max = (trainMax > dictLen) ? dictLen : trainMax // dataGlobSettings[dataGlobSettings.current_lang].max 
+    const lengthUnrepSeq = (max < UNREPEAT_LENGTH * 2) ? Math.trunc(max / 2) : UNREPEAT_LENGTH
+    // console.log(lengthUnrepSeq)
     if(exArr.includes(ind_arr)){
       return true
     } else {
       exArr.push(ind_arr)
-      if (exArr.length > 6) exArr.shift()  
+      if (exArr.length > lengthUnrepSeq) exArr.shift()  
+      maxCall = 0
       return false   
     }
   }

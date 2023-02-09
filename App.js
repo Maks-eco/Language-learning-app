@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, Pressable, TextInput, SafeAreaView, Dimensions, Image } from 'react-native';
+import { StyleSheet, Text, View, Pressable, TextInput, SafeAreaView, Image } from 'react-native';
 import React, { useState, useEffect, Component } from 'react';
 import Button from './modules/mainScreenBlock';
 import SetsInterf from './modules/settingsInputs';
@@ -9,8 +9,6 @@ let intEmiter = interfaceEmitter //only mainblock 'event tap' & 'event change va
 let scopeSets = scopeSetts // => only get settings value localStore 
 
 import { sendScopeSettings } from './modules/updateStateController'; // <= only set settings value localStore 
-
-const heightX = Dimensions.get('screen').height;
 
 class App extends Component {
   constructor (props){
@@ -29,7 +27,7 @@ class App extends Component {
   }
 
   changePage(e){
-    console.log((this.state.page ==='sets') ? 'main' : 'sets')
+    // console.log((this.state.page ==='sets') ? 'main' : 'sets')
     this.setState({ page: (this.state.page ==='sets') ? 'main' : 'sets'}) 
   }
 
@@ -99,7 +97,7 @@ class Setst extends Component {
       style={styles.prsbl}
       onPress={this.handEvenPrs}>    
         <View style={styles.link}>
-        <Image source={require('./assets/sets_star.png')} style={{width: 40, height: 40, marginLeft: 10}} />
+        <Image source={require('./assets/sets_star_wt.png')} style={styles.img} />
         <Text>{/*{heightX}*/}</Text>
         </View>  
       </Pressable>   
@@ -108,13 +106,11 @@ class Setst extends Component {
   }
 }
 
-const newHe = (heightX - 100)
-console.log(heightX)
 
 const styles = StyleSheet.create({
   container: {
     width:'100%',
-    height:'100%',
+    height:'100%' ,
     // flex: 1,
     backgroundColor: '#fff',
     // alignItems: 'center',
@@ -124,8 +120,8 @@ const styles = StyleSheet.create({
     width:70,
     height:70,
     flexDirection: "row", 
-    position: 'absolute', 
-    marginTop: 50/*newHe*/,
+    position: 'relative', 
+    marginTop: -70 /*50*/,
     // bottom:'0',
     // zIndex: '50', 
   },
@@ -150,6 +146,9 @@ const styles = StyleSheet.create({
     }    
   },
   link: {
+
+    alignItems: 'center',
+    justifyContent: 'center', 
     width:"100%",
     height:"100%",
     // backgroundColor: '#777',
@@ -158,6 +157,12 @@ const styles = StyleSheet.create({
     width:'100%',
     height:'100%',
   },
+  img:{
+    opacity: 0.35, 
+    width: 40, 
+    height: 40, 
+    /*marginLeft: 10*/
+},
 });
 
 export default App;

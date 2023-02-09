@@ -1,11 +1,6 @@
 // import React, { Component } from 'react';
 import { StyleSheet, Text, View, Pressable, SafeAreaView, TextInput  } from 'react-native';
-import React, { useState, useEffect, Component } from 'react';
-
-
-
-
-// const testSetting = {current_lang:'kor',kor:{min:0,max:10},eng:{min:0,max:10},hide:0}
+import React, { useState, Component, useEffect } from 'react';
 
 class SetsInterf extends Component {
 
@@ -15,77 +10,106 @@ class SetsInterf extends Component {
       scope: this.props.scope
     };
     this.testEventFromCh = this.testEventFromCh.bind(this);
-    this.testEventFromInp = this.testEventFromInp.bind(this);
+    // this.testEventFromInp = this.testEventFromInp.bind(this);
   } 
 
   componentDidMount() {
-    // this.props.aguard.emit('attch', 'attch')
   }
+
   testEventFromCh(e){
-    // console.log(e)
     this.setState({ scope: JSON.parse(e) }) 
     this.props.onIntChoTap(e)
   }
 
-  testEventFromInp(e){
-    // storeData('settings', e)
-    // console.log(e)
-    this.setState({ scope: JSON.parse(e) }) 
-    this.props.onIntInpTap(e)
-  }
+  // testEventFromInp(e){
+  //   this.setState({ scope: JSON.parse(e) }) 
+  //   this.props.onIntInpTap(e)
+  // }
 
   render(){
     const intInEmiter = this.props.intEmiter
     const scopeInSets = this.state.scope
-    console.log(scopeInSets)
+    // console.log(scopeInSets)
     return (  
       <View  style={styleSets.cont}>
-        <View  style={styleSets.block1}>          
-          <ChoiseInput aguard={intInEmiter} name='lang' label='Язык: ' 
-          arr={['Inglash', 'Korean']}
-          onTapChoise={this.testEventFromCh}
-          scopeSets={scopeInSets} />
-          <ChoiseInput aguard={intInEmiter} name='hide' label='Скрывать: ' 
-          arr={['Inglash', 'Russil', 'Oba biba boba']} 
-          onTapChoise={this.testEventFromCh}
-          scopeSets={scopeInSets}  />
-          <SetsInput aguard={intInEmiter} label='Min' numb='234' name='min' 
-          onInpValueText={this.testEventFromInp}
-          scp={scopeInSets} />
-          <SetsInput aguard={intInEmiter} label='Max' numb='345' name='max' 
-          onInpValueText={this.testEventFromInp}
-          scp={scopeInSets} />
-        {/*  <fieldset>
-            <legend style={styleSets.legend}>Enter temperature in :</legend>
-            <TextInput value='100' style={styleSets.input}
-                    />
-          </fieldset>*/}
-           
+        <View  style={styleSets.block1}>         
+          <ChoiseInput 
+            name='current_lang' label='Скрывать: ' 
+            arr={{eng:'English', kor:'Korean'}} 
+            onTapChoise={this.testEventFromCh}
+            settingsData={scopeInSets}  />
+          <ChoiseInput 
+            name='hide' label='Скрывать: ' 
+            arr={{eng:'оригинал', rus:'перевод', bth:'попеременно'}} 
+            onTapChoise={this.testEventFromCh}
+            settingsData={scopeInSets}  />
+          {/*<SetsInput 
+            name='min' label='Min'
+            onInpValueText={this.testEventFromInp}
+            settingsData={scopeInSets}  />*/}
+          <SetsInput 
+            name='max' label='Max' 
+            onInpValueText={this.testEventFromCh}
+            settingsData={scopeInSets} />     
+          <ShowPlot 
+            /*name='max' label='Max' 
+            onInpValueText={this.testEventFromInp}
+            settingsData={scopeInSets}*/
+            intEmiter={intInEmiter}
+            settingsData={scopeInSets} />       
         </View>         
-        <View  style={styleSets.block2}>          
-            {/*<Text style={stylesElem.text}>{this.state.comments}</Text>*/}          
+        <View style={styleSets.block2}>                   
         </View>      
       </View >
     );    
   }
 }
 
+const ShowPlot = (props) => {
+  const [varData, onChangeData] = React.useState([]);  
+  const maxLen = props.settingsData[props.settingsData.current_lang].max
 
+  props.intEmiter.on('getPlotReturn', (obj)=>{     
+    onChangeData(obj)
+  })  
+  
+  if((varData.length == 0 || varData[0][0].ind !== maxLen) && maxLen !== 0 ){
+      props.intEmiter.emit('getPlot', maxLen)
+  }
+  useEffect(() => {
+      props.intEmiter.emit('getPlot', maxLen)      
+    return () => {
+      props.intEmiter.removeAllListeners('getPlotReturn');
+    };
+  });
+
+  const listIt = varData.map((arr, grp)=>{
+    return (
+      <View key={grp} style={{      marginHorizontal:-5, flexDirection: "row", }}>
+        <Text style={[styleSets.textMini, { left: 13,}]}>{arr[0].ind}</Text>     
+        {arr.map((item, key)=>{
+          const heiEl = Math.ceil(20*item.prob)
+          const marTop = 31 - heiEl  
+            return <View key={key} style={[{height:heiEl,marginTop:marTop,  } , styleSets.plotColumn  ]}></View>
+          })
+        }
+        {arr.length > 8 &&
+          <Text style={[styleSets.textMini, { left: -13,}]}>{arr[arr.length-1].ind}</Text>         
+        }
+      </View>
+    )
+  })
+
+// console.log(listIt)
+  return (
+    <View style={{flexDirection: "row"}}>
+      {listIt}
+    </View>
+  );
+};
 
 const SetsInput = (props) => {
-  // const [number, onChangeNumber] = React.useState(props.scp[props.scp.current_lang][props.name] /*props.numb*/);
-  const number = props.scp[props.scp.current_lang][props.name]
-
-  // useEffect(() => {
-  //       // Anything in here is fired on component mount.
-  //       props.aguard.on('updMinMax', (lang) => {
-  //         onChangeNumber(props.scp[lang][props.name])    
-  //       })
-  //       return () => {
-  //           // Anything in here is fired on component unmount.
-  //           props.aguard.removeAllListeners('updMinMax');
-  //       }
-  //   }, [])
+  const number = props.settingsData[props.settingsData.current_lang][props.name]
 
   function onInInInInIn(e){
     props.onInpValueText(e);
@@ -95,10 +119,8 @@ const SetsInput = (props) => {
     event = parseInt(event)
     if(isNaN(event))  event = 0
     if(event > 10000 /*maxnumber*/) return
-    // onChangeNumber(event)
-    const bufScope = props.scp//scopeSets()
+    const bufScope = props.settingsData
     bufScope[bufScope.current_lang][props.name] = event
-    // storeData('settings', JSON.stringify(bufScope))
     onInInInInIn(JSON.stringify(bufScope))
   }
 
@@ -118,54 +140,42 @@ const SetsInput = (props) => {
 
 
 const ChoiseInput = (props) => {
-  let indArr = 0
-  const scopeChoiseInput = props.scopeSets
-  if(props.name == 'lang'){
-      indArr = (scopeChoiseInput.current_lang == 'kor') ? 1 : 0      
-    }
-  else
-    indArr = scopeChoiseInput.hide
-  // console.log(props.name, indArr)
-  // const [num, onChangeTap] = React.useState(indArr);  
-  const num = indArr
-  // const [variant, onChangeVar] = React.useState(props.arr[indArr]);
-  const variant = props.arr[indArr]
-  const varList = props.arr
+  const scopeChoiseInput = props.settingsData 
+  let innerStorValue = scopeChoiseInput[props.name]     
+  const [variant, onChangeTap] = React.useState(innerStorValue);  
+  const varList = Object.entries(props.arr)
 
-   // useEffect(() => {
-   //      return () => {
-   //      }
-   //  }, [])
+  function nextKey(array, key){
+    let nextKeyInd 
+    for (var i = 0; i < array.length; i++) {
+      if(i == array.length - 1){
+        nextKeyInd = 0
+        break
+      }
+      if(array[i][0] == key){
+        nextKeyInd = i + 1
+        break
+      }
+    }
+    return array[nextKeyInd][0]
+  }
 
   function onTapTapTapTap(e){
     props.onTapChoise(e);
   }
 
-  function varvar(event) {
-    
-    const newnum = (num < (varList.length - 1)) ? num + 1 : 0
-
-    if (props.name == 'lang'){
-      scopeChoiseInput.current_lang = (newnum == 1) ? 'kor' : 'eng'
-      // props.aguard.emit('updMinMax', scopeChoiseInput.current_lang)
-    }
-    else {
-      scopeChoiseInput.hide = newnum
-    }
-    
+  function varvar(event) {    
+    const newnum = nextKey(varList, variant)
+    scopeChoiseInput[props.name] = newnum
     onTapTapTapTap(JSON.stringify(scopeChoiseInput))
-
-    // onChangeTap(newnum)    
-    // onChangeVar(varList[newnum])
-    // onChangeScopeChoiseInput(scopeChoiseInput)
+    onChangeTap(newnum)
   }
   
   return (    
     <View> 
-      <Pressable /*style={styleSets.pr}*/ 
-        onPress={varvar}> 
+      <Pressable onPress={varvar}> 
         <View style={styleSets.choisebuttn}> 
-          <Text style={styleSets.choisetext}>{props.label}{variant}</Text>
+          <Text style={styleSets.choisetext}>{props.label}{props.arr[variant]}</Text>
         </View>
       </Pressable>      
     </View>    
@@ -174,15 +184,31 @@ const ChoiseInput = (props) => {
 
 
 
-
 const styleSets = StyleSheet.create({
+  miniblock:{
+    height: 40,
+    width: 40,
+    margin: 12,
+    backgroundColor: '#444',
+  },
+  plotColumn:{
+    width:2,
+    // height:heiEl,
+    margin: 1,
+    backgroundColor: '#fff',
+    // marginTop:marTop,  
+  },
+  textMini:{
+    color: '#ffffff99',
+    fontWeight: 'bold',
+    fontSize: 10,
+    alignSelf: 'center', 
+    position:'relative',
+    top: 20, 
+  },
   cont: {
     width:'100%',
     height:'100%',
-    // flex: 1,
-    // backgroundColor: '#fff',
-    // alignItems: 'center',
-    // justifyContent: 'center',
   },
   block1: {
     justifyContent: 'center',
@@ -215,34 +241,25 @@ const styleSets = StyleSheet.create({
     width:'100%',
     height:'10%',
     flexDirection: "row",
-    // flex: 1,
-    // backgroundColor: '#5e4a20bb',
-    // alignItems: 'center',
-    // justifyContent: 'center',
   },
   choisebuttn: { 
     MozUserSelect: "none",
     WebkitUserSelect: "none",
     msUserSelect: "none",
     selectable:false,
-    // width:'100px',
     justifyContent: 'center',
     alignItems: 'center',
     height:40,    
     width:200,
-    // backgroundColor: '#777',
     backgroundColor: '#945454',
-    // marginTop:10,
     marginBottom:10,
   },
   choisetext:{
     color: '#fff',
-    // fontSize: 13,
     fontWeight: 'bold',
   },
   legend:{
     fontWeight: 'bold',
-    // font:' 14px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
   }
 });
 

@@ -16,7 +16,7 @@ export let dataGlobDictionary = [
     {la: "말이 없습니다", tr: "no words", co: "mal-i eobs-seubnida"}, 
   ]
 
-export let dataGlobSettings = {current_lang:'kor',kor:{min:0,max:10},eng:{min:0,max:10},hide:0}
+export let dataGlobSettings = {current_lang:'kor',kor:{min:0,max:10},eng:{min:0,max:10},hide:'bth'}
 
 async function init(){
   getData('dictionary')
@@ -80,6 +80,9 @@ function sendScope(){
 
 function sendScopeSettings(e){ //get data from input element from settings, then save it in localStorage
    // console.log(e)
+   let data = JSON.parse(e)
+   if (data[data.current_lang].max < 3) data[data.current_lang].max = 3
+   e = JSON.stringify(data)
   storeData('settings', e).then(() => init()  )
 }
 

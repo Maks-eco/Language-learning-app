@@ -9,11 +9,16 @@ class Button extends Component {
   constructor(props){
     super(props);
     this.state = {     
-      comments: '다음'//'empt inpt'
+      comments: '다음', // 'empt inpt'
+      comcom: ' ',
     };
 
-    props.aguard.on(props.msg_in, (msg) => {
-      this.setState({ comments: msg })     
+    props.aguard
+    .on(props.msg_in, (msg) => {
+      this.setState({ comments: msg, comcom: ' ' })     
+    })
+    .on(`${props.msg_in}com`, (msg) => {
+      this.setState({ comcom: msg })     
     })
   } 
 
@@ -24,6 +29,7 @@ class Button extends Component {
   //   this.props.aguard.off(this.props.msg_out, () => {return true})
     // this.props.aguard.removeAllListeners(this.props.msg_out);
     this.props.aguard.removeAllListeners(this.props.msg_in);
+    this.props.aguard.removeAllListeners(`${this.props.msg_in}com`);
   }
 
   //.removeListener('event', callbackB);
@@ -38,6 +44,7 @@ class Button extends Component {
         <View  style={stylesElem.inner}>
           
             <Text style={stylesElem.text}>{this.state.comments}</Text>
+            <Text style={stylesElem.textCommnt}>{this.state.comcom}</Text>
           
         </View>
       </Pressable>
@@ -77,9 +84,14 @@ const stylesElem = StyleSheet.create({
     justifyContent: 'center',    
   },
   text:{
+    marginTop:20,
     color: '#fff',
     fontSize: 30,
-  }
+  },
+  textCommnt:{
+    color: '#ffffff77',
+    fontSize: 15,
+  },
 });
  
 
