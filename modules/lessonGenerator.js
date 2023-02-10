@@ -52,7 +52,7 @@ interfaceEmitter
   }
 }).on('getPlot', (msg) => { 
   try {  
-    console.log('reparePropabilityVisualisation(msg)',msg)
+    // console.log('reparePropabilityVisualisation(msg)',msg)
     interfaceEmitter.emit('getPlotReturn', preparePropabilityVisualisation(msg))    
   } catch(e) {
     console.log(e)
@@ -276,14 +276,14 @@ function randomChoiseFromPlotObj(len){
       prblty = Math.random()
     }else{
       goThis = false
-      goThis = chechIndexByAlreadyExist(someInd)
+      goThis = checkIndexByAlreadyExist(someInd)
       if(goThis) someInd = Math.ceil( Math.random() * objIndProbGlobal.length ) - 1 
     }
   }
   return len - objIndProbGlobal[someInd].ind - 1
 }
 
-function chechIndexBy(){
+function checkIndexBy(){
   let exArr = []
   let maxCall = 0
   return (ind_arr) => {
@@ -305,7 +305,7 @@ function chechIndexBy(){
     }
   }
 }
-const chechIndexByAlreadyExist = chechIndexBy()
+const checkIndexByAlreadyExist = checkIndexBy()
 
 const scopeSetts = () => {return dataGlobSettings}
 

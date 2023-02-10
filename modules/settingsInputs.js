@@ -34,8 +34,8 @@ class SetsInterf extends Component {
       <View  style={styleSets.cont}>
         <View  style={styleSets.block1}>         
           <ChoiseInput 
-            name='current_lang' label='Скрывать: ' 
-            arr={{eng:'English', kor:'Korean'}} 
+            name='current_lang' label='Язык: ' 
+            arr={{eng:'English', kor:'한국인'}} 
             onTapChoise={this.testEventFromCh}
             settingsData={scopeInSets}  />
           <ChoiseInput 
@@ -58,7 +58,22 @@ class SetsInterf extends Component {
             intEmiter={intInEmiter}
             settingsData={scopeInSets} />       
         </View>         
-        <View style={styleSets.block2}>                   
+        <View style={styleSets.block2}>     
+          <SetsInput 
+            name='table' label='Google Sheets таблица' 
+            onInpValueText={this.testEventFromCh}
+            settingsData={scopeInSets} 
+            longText={true} />
+          <SetsInput 
+            name='key' label='Ключ' 
+            onInpValueText={this.testEventFromCh}
+            settingsData={scopeInSets}
+            longText={true} />     
+          <SetsInput 
+            name='list' label='Страница в таблице' 
+            onInpValueText={this.testEventFromCh}
+            settingsData={scopeInSets}
+            longText={true} />            
         </View>      
       </View >
     );    
@@ -109,7 +124,13 @@ const ShowPlot = (props) => {
 };
 
 const SetsInput = (props) => {
-  const number = props.settingsData[props.settingsData.current_lang][props.name]
+  let number 
+  if(props.longText) {
+    number = props.settingsData[props.name]
+    if(number && number !== '') number = number.toString() // number = ' '    
+  } else {
+    number = props.settingsData[props.settingsData.current_lang][props.name].toString()
+  }
 
   function onInInInInIn(e){
     props.onInpValueText(e);
@@ -124,14 +145,24 @@ const SetsInput = (props) => {
     onInInInInIn(JSON.stringify(bufScope))
   }
 
+  function doroyText(event){
+    const bufScope = props.settingsData
+    bufScope[props.name] = event
+    onInInInInIn(JSON.stringify(bufScope))
+  }
+
+  const legendView = props.longText ? styleSets.inputLegend2 : styleSets.inputLegend
+  const inputView = props.longText ? styleSets.input2 : styleSets.input
+  const kboardtype = props.longText ?  'text' : "numeric"
+
   return (
     <SafeAreaView>  
-      <Text style={styleSets.inputLegend}>{props.label}  </Text> 
+      <Text style={legendView}>{props.label}  </Text> 
       <TextInput        
-          style={styleSets.input}
-          onChangeText={doroy}
-          value={number.toString()}
-          keyboardType="numeric"
+          style={inputView}
+          onChangeText={props.longText ? doroyText : doroy}
+          value={number/*.toString()*/}
+          keyboardType={kboardtype}
         />
       
     </SafeAreaView>
@@ -215,23 +246,41 @@ const styleSets = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#0d7e4ebb',
     width:'100%',
-    height:'73%',
+    height:'65%',
   },
   block2: {
+    justifyContent: 'center',
+    alignItems: 'center',
     backgroundColor: '#6c1515bb',
     width:'100%',
-    height:'27%',
+    height:'35%',
   },
   inputLegend:{
     fontWeight: 'bold',
-    color: '#945454' /*'#fff'*/,
+    color: /*'#945454'*/ '#ffffff99',
   },
   input: {
     color: '#fff',
     height: 40,
     width: 120,
     margin: 12,
-    borderColor: '#945454' /*'#fff'*/,
+    borderColor: /*'#945454'*/ '#ffffff99',
+    borderWidth: 1,
+    padding: 10,
+    fontWeight: 'bold',
+    marginTop:0,
+  },
+  inputLegend2:{
+    fontWeight: 'bold',
+    color: /*'#4ea17e'*/ '#ffffff77',
+    fontSize: 10,
+  },
+  input2: {
+    color: '#fff',
+    height: 30,
+    width: 200,
+    margin: 6,
+    borderColor: /*'#945454'*/ '#ffffff77',
     borderWidth: 1,
     padding: 10,
     fontWeight: 'bold',

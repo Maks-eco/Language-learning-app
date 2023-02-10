@@ -3,13 +3,14 @@
 
 // let good = 'norm'
 
-async function funcFunc(lang_c, link, key){
+async function funcFunc(lang_c, link, key, listNameTable){
 // `https://sheets.googleapis.com/v4/spreadsheets/1csysK6t9agb7WFohdAKFcZUbACvZ3-qN8fhapcJtYYg/values/${lang}?valueRenderOption=FORMATTED_VALUE&key=AIzaSyCWFhSQBc5xjNZyj8OEth3P9ZWNg83HDwo`
   if(!link) link = '1csysK6t9agb7WFohdAKFcZUbACvZ3-qN8fhapcJtYYg'
   if(!key)  key = 'AIzaSyCWFhSQBc5xjNZyj8OEth3P9ZWNg83HDwo'
 
   try {
-    const lang = (lang_c == 'kor') ? 'Kor_list' : 'Eng_list' // 'Test_list' 
+    let lang = (lang_c == 'kor') ? 'Kor_list' : 'Eng_list' // 'Test_list' 
+    if(listNameTable) lang = listNameTable
     let data = await fetch(
       `https://sheets.googleapis.com/v4/spreadsheets/${link}/values/${lang}?valueRenderOption=FORMATTED_VALUE&key=${key}`
     );
@@ -39,10 +40,10 @@ async function funcFunc(lang_c, link, key){
   }
 }
 
-function promiseDataGsheet (lang_c, link, key){
+function promiseDataGsheet (lang_c, link, key, listNameTable){
   return new Promise((resolve, reject) => {
     try{
-      const res = funcFunc(lang_c, link, key)      
+      const res = funcFunc(lang_c, link, key, listNameTable)      
       resolve(res)
     }catch (err){
       reject(err)

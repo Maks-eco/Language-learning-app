@@ -16,7 +16,36 @@ export let dataGlobDictionary = [
     {la: "말이 없습니다", tr: "no words", co: "mal-i eobs-seubnida"}, 
   ]
 
-export let dataGlobSettings = {current_lang:'kor',kor:{min:0,max:10},eng:{min:0,max:10},hide:'bth'}
+export let dataGlobSettings = {
+  current_lang:'kor',
+  kor:{min:0,max:10},
+  eng:{min:0,max:10},
+  hide:'bth',
+  table: '',
+  key: '',
+  list: '',
+}
+
+function checkUserInput(){
+  let undArr = [] 
+  for(const item of arguments){
+    undArr.push(void 0)
+  }
+  try{
+    let existEmpty = false
+    for(const item of arguments){
+      if (!item || item == '' ) existEmpty = true
+    }
+    if (existEmpty){       
+      return undArr
+    } else {
+     return arguments
+    }
+  }catch (e){
+    console.log(e)
+    return undArr
+  }   
+}
 
 async function init(){
   getData('dictionary')
@@ -25,8 +54,10 @@ async function init(){
     .then((res) =>{ 
       dataGlobSettings = JSON.parse( res)
 
-      let chnk = JSON.parse(res)
-      promiseGoogleSheet(chnk.current_lang)
+      let chnk = JSON.parse(res)          
+      const [table, key, list] = checkUserInput(chnk.table, chnk.key, chnk.list)
+      // console.log(table, key, list)
+      promiseGoogleSheet(chnk.current_lang, table, key, list)
         .then((msg)=>{
           storeData('dictionary', msg);
           dataGlobDictionary = JSON.parse( msg)
@@ -34,7 +65,7 @@ async function init(){
         })
         .catch((e)=>{
           console.log(e)
-        })
+        })      
     })
     .catch(e => {
       // console.log(e.name)
