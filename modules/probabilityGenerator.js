@@ -66,9 +66,7 @@ function randomChoiseFromPlotObj(len) {
   if (onceCall) {
     objIndProbGlobal = generProbabilityPlotObj(len)
     onceCall = false
-    // console.log('onceCall = true')
   }
-
   let prblty = Math.random()
   let someInd = Math.ceil(Math.random() * objIndProbGlobal.length) - 1
   let goThis = true

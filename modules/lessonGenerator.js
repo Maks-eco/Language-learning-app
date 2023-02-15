@@ -31,7 +31,7 @@ function symbolChange(symbol, numberTapsEnt, initWord) {
 
   let colTaps = numberTapsEnt - 1
 
-  if (colTaps >= initWord.length /* + 1 */) colTaps = initWord.length /* + 1 */// //add shift +1 for hide '-' characters
+  if (colTaps >= initWord.length) colTaps = initWord.length
   let cropWord = ''
   for (let i = 0; i < initWord.length; i++) {
     if (initWord[i] === ' ') { cropWord += ' ' } else { cropWord += symbol }
@@ -39,7 +39,7 @@ function symbolChange(symbol, numberTapsEnt, initWord) {
   return { colTaps, cropWord }
 }
 
-function showCharactersByTaps(numberTapsEnt, tpsArray, initWord, currentLang) { // -----Korean-----
+function showCharactersByTaps(numberTapsEnt, tpsArray, initWord, currentLang) {
   let { colTaps, cropWord } = symbolChange(currentLang === 'kor' ? 'ㅡ' : '-', numberTapsEnt, initWord)
   for (let i = 0; i < colTaps; i++) {
     if (currentLang === 'kor') {
@@ -108,7 +108,8 @@ function addInitTapUnhide() {
 
     if (!id) {
       let tapsWrd
-      if (dataGlobSettings.currentLang === 'kor' && isHideTransl) { tapsWrd = wrdSemihiddenGlob.length + 1 } else { tapsWrd = Math.ceil((wrdSemihiddenGlob.length / 3 + 1)) }
+      if (dataGlobSettings.currentLang === 'kor' && isHideTransl) { tapsWrd = wrdSemihiddenGlob.length + 1 } 
+      else { tapsWrd = Math.ceil((wrdSemihiddenGlob.length / 3 + 1)) }
       if (numbGlobTaps > tapsWrd) {
         interfaceEmitter.emit('shtwords2trancom', commnt ? `(${commnt})` : ' ')
       }
@@ -119,7 +120,7 @@ const addTapUnhide = addInitTapUnhide()
 
 function loadNewLesson() {
   let maxTrain = 0
-  maxTrain = dataGlobSettings[dataGlobSettings.currentLang].max // sets.max
+  maxTrain = dataGlobSettings[dataGlobSettings.currentLang].max
 
   if (maxTrain > (dataGlobDictionary.length - 1)) {
     maxTrain = dataGlobDictionary.length - 1

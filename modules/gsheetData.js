@@ -35,6 +35,5 @@ function promiseDataGsheet(langCurr, link, key, listNameTable) {
 }
 
 module.exports = {
-  Hello: 'hello',
   promiseDataGsheet,
 }

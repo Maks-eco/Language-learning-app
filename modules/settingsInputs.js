@@ -196,7 +196,7 @@ const SetsInput = (props) => {
   let number
   if (props.textInputType && !props.scriptDependent) {
     number = props.settingsData[props.name]
-    if (number && number !== '') number = number.toString() // number = ' '
+    if (number && number !== '') number = number.toString()
   } else {
     number = props.settingsData[props.settingsData.currentLang][props.name].toString()
   }
