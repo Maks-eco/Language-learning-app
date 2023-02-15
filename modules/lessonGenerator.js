@@ -1,312 +1,173 @@
-const EventEmitter = require('events');
-const interfaceEmitter = new EventEmitter();
+import { sendScope, dataGlobDictionary, dataGlobSettings } from './updateStateController'
+import { randomChoiseFromPlotObj, updateProbabilityArray, preparePropabilityVisualisation } from './probabilityGenerator'
 
-import { sendScope, dataGlobDictionary, dataGlobSettings } from './updateStateController';
+const EventEmitter = require('events')
 
-let objIndProbGlobal = []
-let onceCall = true
-const UNREPEAT_LENGTH = 6
+const interfaceEmitter = new EventEmitter()
 
-function updateScope () {  
-  sendScope().then(()=>{
-    // console.log('scopeUpdated')  
-    const dictLen = dataGlobDictionary.length - 1
-    const trainMax = dataGlobSettings[dataGlobSettings.current_lang].max
-    objIndProbGlobal = generProbabilityPlotObj(trainMax > dictLen ? dictLen : trainMax)
-    
-    loadNewLesson() 
-  })
-}
-
-interfaceEmitter
-.on('resp1', (msg) => {
-  try {  
-    addTapUnhide()
-  } catch(e) {    
-    console.log(e)
-  }
-}).on('resp2', (msg) => {
-  try {
-    addTapUnhide()  
-  } catch(e) {
-    console.log(e)
-  }
-}).on('resp3', (msg) => { 
-  try {  
-    // console.log(dataGlobSettings)  
-    // console.log(dataGlobDictionary)
-    loadNewLesson()    
-  } catch(e) {
-    console.log(e)
-  }
-}).on('attch', (msg) => {
-  try {
-    console.log('attch: ' + msg);   
-    // console.log(dataGlobSettings)  
-    // console.log(dataGlobDictionary)
-    loadNewLesson()
-    updateScope()
-
-  } catch(e) {
-    console.log(e)
-  }
-}).on('getPlot', (msg) => { 
-  try {  
-    // console.log('reparePropabilityVisualisation(msg)',msg)
-    interfaceEmitter.emit('getPlotReturn', preparePropabilityVisualisation(msg))    
-  } catch(e) {
-    console.log(e)
-  }
-})
-
-function genRandomChunksField(lang_word, currentLang){
-  let tpsArr = []
-  const max = (currentLang == 'kor') ? lang_word.length : Math.ceil(lang_word.length / 3)
-  // const max = Math.ceil(lang_word.length / 3)
-  for (var i = 0; i < max; i++) {
-    tpsArr.push(Math.random())/* = Math.random()*/
-  }
-  return toSequenceShowingPartsOfWords(tpsArr)
-}
-
-function toSequenceShowingPartsOfWords(tpsArr){
+function toSequenceShowingPartsOfWords(tpsArr) {
   let max = 0
-  let tapesInd = []
-  for (var i = 0; i < tpsArr.length; i++) {
+  const tapesInd = []
+  for (let i = 0; i < tpsArr.length; i++) {
     max = Math.max(...tpsArr)
-    tapesInd[i] = tpsArr.indexOf(max);
+    tapesInd[i] = tpsArr.indexOf(max)
     tpsArr[tapesInd[i]] = 0
   }
   return tapesInd
 }
 
+function genRandomChunksField(langWord, currentLang) {
+  const tpsArr = []
+  const max = (currentLang === 'kor') ? langWord.length : Math.ceil(langWord.length / 3)
+  for (let i = 0; i < max; i++) {
+    tpsArr.push(Math.random())
+  }
+  return toSequenceShowingPartsOfWords(tpsArr)
+}
 
-function symbolChange (symbol,  numberTapsEnt, init_word){
-    //hide characters if no one touch, shift showing at one touch 
-  if (numberTapsEnt == 0) return ' '
+function symbolChange(symbol, numberTapsEnt, initWord) {
+  // hide characters if no one touch, shift showing at one touch
+  if (numberTapsEnt === 0) return ' '
 
   let colTaps = numberTapsEnt - 1
 
-  if(colTaps >= init_word.length /*+ 1*/) colTaps = init_word.length /*+ 1 */// //add shift +1 for hide '-' characters 
-  let crop_word = ''  
-  for (var i = 0; i < init_word.length; i++) {
-    if(init_word[i] == ' ')
-      crop_word += ' '
-    else      
-      crop_word += symbol       
+  if (colTaps >= initWord.length /* + 1 */) colTaps = initWord.length /* + 1 */// //add shift +1 for hide '-' characters
+  let cropWord = ''
+  for (let i = 0; i < initWord.length; i++) {
+    if (initWord[i] === ' ') { cropWord += ' ' } else { cropWord += symbol }
   }
-  return {colTaps, crop_word}
-}
-function showCharactersByTaps(numberTapsEnt, tpsArray, init_word, currentLang){ //-----Korean-----
-  let {colTaps, crop_word} = symbolChange (currentLang == 'kor' ? 'ㅡ' : '-',  numberTapsEnt, init_word)
-  for (var i = 0; i < colTaps; i++) {  
-    if(currentLang == 'kor')  {
-      crop_word = crop_word.substring(0,tpsArray[i]) 
-        + init_word.substring(tpsArray[i],tpsArray[i]+1) 
-        + crop_word.substring(tpsArray[i]+1) 
-    } else {
-      crop_word = crop_word.substring(0,tpsArray[i]*3) 
-        + init_word.substring(tpsArray[i]*3,tpsArray[i]*3+3) 
-        + crop_word.substring(tpsArray[i]*3+3) 
-    }
-  }
-  return crop_word
+  return { colTaps, cropWord }
 }
 
-function addInitTapUnhide(){
+function showCharactersByTaps(numberTapsEnt, tpsArray, initWord, currentLang) { // -----Korean-----
+  let { colTaps, cropWord } = symbolChange(currentLang === 'kor' ? 'ㅡ' : '-', numberTapsEnt, initWord)
+  for (let i = 0; i < colTaps; i++) {
+    if (currentLang === 'kor') {
+      cropWord = cropWord.substring(0, tpsArray[i])
+        + initWord.substring(tpsArray[i], tpsArray[i] + 1)
+        + cropWord.substring(tpsArray[i] + 1)
+    } else {
+      cropWord = cropWord.substring(0, tpsArray[i] * 3)
+        + initWord.substring(tpsArray[i] * 3, tpsArray[i] * 3 + 3)
+        + cropWord.substring(tpsArray[i] * 3 + 3)
+    }
+  }
+  return cropWord
+}
+
+function hideTranslChoise(hideParam) {
+  if (hideParam === 'rus') {
+    return false
+  }
+  if (hideParam === 'bth') {
+    return !((Math.random() > 0.5))
+  }
+  return true
+}
+
+function addInitTapUnhide() {
   let iniGlobOpendWord = ''
-  let wordsArrayGlob = [] 
-  let numbGlobTaps = 0 //tps
-  let genGlob = [] // tps
-  let iniGlobHiddenWord = '' //tps
-  let wrdSemihiddenGlob = '' //tps
-  let commnt = '' //tps
-  let isHideTransl = true //hideTranslChoise(dataGlobSettings.hide)
+  let wordsArrayGlob = []
+  let numbGlobTaps = 0
+  let genGlob = []
+  let iniGlobHiddenWord = ''
+  let wrdSemihiddenGlob = ''
+  let commnt = ''
+  let isHideTransl = true
   return (id) => {
-    
     wordsArrayGlob = dataGlobDictionary
-    if(id){
+    if (id) {
       isHideTransl = hideTranslChoise(dataGlobSettings.hide)
-      numbGlobTaps = 0   
-      
+      numbGlobTaps = 0
+
       iniGlobHiddenWord = (isHideTransl) ? wordsArrayGlob[id].la : wordsArrayGlob[id].tr
       iniGlobOpendWord = (!isHideTransl) ? wordsArrayGlob[id].la : wordsArrayGlob[id].tr
       commnt = wordsArrayGlob[id].co
 
-      if (dataGlobSettings.current_lang == "kor"){
-        genGlob = genRandomChunksField( iniGlobHiddenWord, (isHideTransl) ? 'kor' : 'eng')
+      if (dataGlobSettings.currentLang === 'kor') {
+        genGlob = genRandomChunksField(iniGlobHiddenWord, (isHideTransl) ? 'kor' : 'eng')
       } else {
-        genGlob = genRandomChunksField( iniGlobHiddenWord, 'eng')
+        genGlob = genRandomChunksField(iniGlobHiddenWord, 'eng')
       }
-    }else{
-      numbGlobTaps++
+    } else {
+      numbGlobTaps += 1
     }
 
-    if (dataGlobSettings.current_lang == "kor"){        
+    if (dataGlobSettings.currentLang === 'kor') {
       wrdSemihiddenGlob = showCharactersByTaps(numbGlobTaps, genGlob, iniGlobHiddenWord, (isHideTransl) ? 'kor' : 'eng')
-    } else {    
+    } else {
       wrdSemihiddenGlob = showCharactersByTaps(numbGlobTaps, genGlob, iniGlobHiddenWord, 'eng')
     }
-    if(isHideTransl){
+    if (isHideTransl) {
       interfaceEmitter.emit('shtwords1lang', wrdSemihiddenGlob)
       interfaceEmitter.emit('shtwords2tran', iniGlobOpendWord)
     } else {
       interfaceEmitter.emit('shtwords2tran', wrdSemihiddenGlob)
-      interfaceEmitter.emit('shtwords1lang', iniGlobOpendWord )
+      interfaceEmitter.emit('shtwords1lang', iniGlobOpendWord)
     }
-    
-    if(!id){
+
+    if (!id) {
       let tapsWrd
-      if(dataGlobSettings.current_lang == "kor" && isHideTransl)
-        tapsWrd = wrdSemihiddenGlob.length + 1 
-      else
-      tapsWrd = Math.ceil((wrdSemihiddenGlob.length/ 3 + 1) )
-      if(numbGlobTaps > tapsWrd){ 
-        // console.log("commnt " + (commnt ? commnt : ' '))
+      if (dataGlobSettings.currentLang === 'kor' && isHideTransl) { tapsWrd = wrdSemihiddenGlob.length + 1 } else { tapsWrd = Math.ceil((wrdSemihiddenGlob.length / 3 + 1)) }
+      if (numbGlobTaps > tapsWrd) {
         interfaceEmitter.emit('shtwords2trancom', commnt ? `(${commnt})` : ' ')
       }
-      let x =0 
     }
   }
 }
 const addTapUnhide = addInitTapUnhide()
 
+function loadNewLesson() {
+  let maxTrain = 0
+  maxTrain = dataGlobSettings[dataGlobSettings.currentLang].max // sets.max
 
-
-function hideTranslChoise(hideParam){
-  // console.log(hideParam)
-  if(hideParam == 'rus'/*1*/){
-    return false
+  if (maxTrain > (dataGlobDictionary.length - 1)) {
+    maxTrain = dataGlobDictionary.length - 1
   }
-  if(hideParam == 'bth'/*2*/){
-    return (Math.random() > 0.5) ? false : true
-  }
-  return true
+  addTapUnhide(randomChoiseFromPlotObj(maxTrain))
 }
 
-
-function loadNewLesson(){
-  let max_train = 0
-  max_train = dataGlobSettings[dataGlobSettings.current_lang].max // sets.max
-
-  if(max_train > (dataGlobDictionary.length - 1)) {
-    max_train = dataGlobDictionary.length - 1
-  }
-  addTapUnhide(randomChoiseFromPlotObj(max_train) )
-}
-
-
-function generateArrProbability(ind, len){
-  let x = (ind - 7) / 100 
-  let y = 9 * ( Math.pow(2.71,(-1*x + 0.7)) ) * Math.cos((4*x + 5)) * Math.cos((4*x + 1.35))  // 7 good piks on interval (-0.5; 5)
-  return y
-}
-
-
-function generProbabilityPlotObj(len){
-  const objBufIndProb = []
-  let arrXpoints2 = new Array(len).fill(0)
-  //let arrXpoints2 = [...arrXpoints]
-  arrXpoints2 = arrXpoints2.slice(0, 500)
-  for (var i = 0; i < arrXpoints2.length; i++) {
-    arrXpoints2[i] = generateArrProbability(i, arrXpoints2.length)
-    if (arrXpoints2[i] < 0.03) arrXpoints2[i] = 0
-      else objBufIndProb.push({ind: i, prob: arrXpoints2[i]})
-  }
-// const objBufIndProb2 = objBufIndProb.slice(0, 500)
-  return  objBufIndProb
-}
-
-function preparePropabilityVisualisation(len){
-  const probArr = generProbabilityPlotObj(len)
-  const divArr = []
-  let newGroupIndex = 0
-
-  for (var i = 0; i < probArr.length; i++) {
-    probArr[i].ind = len - probArr[i].ind // - 1
-  }
-
-  // console.log(probArr)
-  divArr.push([])
-  // probArr[0].ind = reLen(probArr[0].ind)
-  divArr[newGroupIndex].push(probArr[0])
-  for (var i = 1; i < probArr.length; i++) {
-    let buf = JSON.parse(JSON.stringify(probArr[i]))
-    if (probArr[i].ind  == probArr[i - 1].ind - 1){
-      // buf.ind = reLen(probArr[i].ind)
-      divArr[newGroupIndex].push(buf)
-    }else{
-      divArr.push([])
-      newGroupIndex++
-      // buf.ind = reLen(probArr[i].ind)
-      divArr[newGroupIndex].push(buf)
-    }
-  }
-  // for (var i = 0; i < divArr.length; i++) {
-  //   divArr[i] = len - divArr[i] - 1
-  // }
-  // console.log(divArr)
-  return divArr
-
-  function reLen(ind){
-    return len - ind - 1
-  }
-}
-preparePropabilityVisualisation(200)
-
-
-function randomChoiseFromPlotObj(len){
-  // console.log(len)
-  if(onceCall){
-    // console.log(len)
-    objIndProbGlobal = generProbabilityPlotObj(len)
-    onceCall = false
-    console.log('onceCall = true')
-  }
-// console.log(objIndProbGlobal.length)
-  
-  let prblty = Math.random()
-  //if(prblty < getMinY(objIndProbGlobal)) prblty += 0.01
-  let someInd = Math.ceil( Math.random() * objIndProbGlobal.length ) - 1
-  let goThis = true
-  while(goThis){
-    if (objIndProbGlobal[someInd].prob < prblty /*&& objIndProbGlobal[someInd].prob > prblty / 0.8*/){
-      someInd = Math.ceil( Math.random() * objIndProbGlobal.length ) - 1 
-      //prblty -= 0.01
-      prblty = Math.random()
-    }else{
-      goThis = false
-      goThis = checkIndexByAlreadyExist(someInd)
-      if(goThis) someInd = Math.ceil( Math.random() * objIndProbGlobal.length ) - 1 
-    }
-  }
-  return len - objIndProbGlobal[someInd].ind - 1
-}
-
-function checkIndexBy(){
-  let exArr = []
-  let maxCall = 0
-  return (ind_arr) => {
-    maxCall++
-    if(maxCall > 100) exArr = []
+function updateScope() {
+  sendScope().then(() => {
     const dictLen = dataGlobDictionary.length - 1
-    const trainMax = dataGlobSettings[dataGlobSettings.current_lang].max
-    // objIndProbGlobal = generProbabilityPlotObj(trainMax > dictLen ? dictLen : trainMax)
-    const max = (trainMax > dictLen) ? dictLen : trainMax // dataGlobSettings[dataGlobSettings.current_lang].max 
-    const lengthUnrepSeq = (max < UNREPEAT_LENGTH * 2) ? Math.trunc(max / 2) : UNREPEAT_LENGTH
-    // console.log(lengthUnrepSeq)
-    if(exArr.includes(ind_arr)){
-      return true
-    } else {
-      exArr.push(ind_arr)
-      if (exArr.length > lengthUnrepSeq) exArr.shift()  
-      maxCall = 0
-      return false   
-    }
-  }
+    const trainMax = dataGlobSettings[dataGlobSettings.currentLang].max
+    updateProbabilityArray(trainMax > dictLen ? dictLen : trainMax)
+
+    loadNewLesson()
+  })
 }
-const checkIndexByAlreadyExist = checkIndexBy()
 
-const scopeSetts = () => {return dataGlobSettings}
+interfaceEmitter
+  .on('showWord', () => {
+    try {
+      addTapUnhide()
+    } catch (e) {
+      console.log(e)
+    }
+  })
+  .on('nextWord', () => {
+    try {
+      loadNewLesson()
+    } catch (e) {
+      console.log(e)
+    }
+  })
+  .on('attch', () => {
+    try {
+      // console.log('attch')
+      updateScope()
+    } catch (e) {
+      console.log(e)
+    }
+  })
+  .on('getPlot', (msg) => {
+    try {
+      interfaceEmitter.emit('getPlotReturn', preparePropabilityVisualisation(msg))
+    } catch (e) {
+      console.log(e)
+    }
+  })
 
-export {/*localStorEmitter, */interfaceEmitter, scopeSetts}
+const scopeSetts = () => dataGlobSettings
+
+export { interfaceEmitter, scopeSetts }

@@ -1,99 +1,74 @@
-// import React, { Component } from 'react';
-import { StyleSheet, Text, View, Pressable  } from 'react-native';
-import React, { useState, useEffect, Component } from 'react';
-
-
-
-class Button extends Component {
-
-  constructor(props){
-    super(props);
-    this.state = {     
-      comments: '다음', // 'empt inpt'
-      comcom: ' ',
-    };
-
-    props.aguard
-    .on(props.msg_in, (msg) => {
-      this.setState({ comments: msg, comcom: ' ' })     
-    })
-    .on(`${props.msg_in}com`, (msg) => {
-      this.setState({ comcom: msg })     
-    })
-  } 
-
-  componentDidMount() {
-    // this.props.aguard.emit('attch', 'attch')
-  }
-  componentWillUnmount() {
-  //   this.props.aguard.off(this.props.msg_out, () => {return true})
-    // this.props.aguard.removeAllListeners(this.props.msg_out);
-    this.props.aguard.removeAllListeners(this.props.msg_in);
-    this.props.aguard.removeAllListeners(`${this.props.msg_in}com`);
-  }
-
-  //.removeListener('event', callbackB);
-
-  render(){
-    return (  
-      <View  style={[this.props.style,stylesElem.container]/*stylesElem.container*/}>
-      <Pressable style={stylesElem.pr}
-          onPress={() => {
-            this.props.aguard.emit(this.props.msg_out, this.props.msg_in + " pressed")
-          }}>    
-        <View  style={stylesElem.inner}>
-          
-            <Text style={stylesElem.text}>{this.state.comments}</Text>
-            <Text style={stylesElem.textCommnt}>{this.state.comcom}</Text>
-          
-        </View>
-      </Pressable>
-      </View >
-    );    
-  }
-}
-
-
+import {
+  StyleSheet, Text, View, Pressable,
+} from 'react-native'
+import React, { Component } from 'react'
 
 const stylesElem = StyleSheet.create({
   container: {
-    // flex: 1,
-    width:'100%',
-    // height:'33.33%',
-    //////////////////////////////////// height:'30%',
-    // backgroundColor: '#fdf',    
-    // alignItems: 'center',
-    // justifyContent: 'center',
-
+    width: '100%',
   },
-  pr: {
-    width:'100%',
-    height:'100%',
+  pressableZone: {
+    width: '100%',
+    height: '100%',
   },
-  inner:{
-    MozUserSelect: "none",
-    WebkitUserSelect: "none",
-    msUserSelect: "none",
-    selectable:false,
-    // flex: 0.3,
-    width:'100%',
-    height:'100%',
-    // height: '30%',
-    // height: '200px',
+  inner: {
+    MozUserSelect: 'none',
+    WebkitUserSelect: 'none',
+    msUserSelect: 'none',
+    selectable: false,
+    width: '100%',
+    height: '100%',
     alignItems: 'center',
-    justifyContent: 'center',    
+    justifyContent: 'center',
   },
-  text:{
-    marginTop:20,
+  mainText: {
+    marginTop: 20,
     color: '#fff',
     fontSize: 30,
   },
-  textCommnt:{
+  commentText: {
     color: '#ffffff77',
     fontSize: 15,
   },
-});
- 
+})
 
+class Button extends Component {
+  constructor(props) {
+    super(props)
+    this.state = {
+      mainLabel: '다음', // 'empty input'
+      commentLabel: ' ',
+    }
 
-export default Button; // Don’t forget to use export default!
+    props.emitter
+      .on(props.msgIn, (msg) => {
+        this.setState({ mainLabel: msg, commentLabel: ' ' })
+      })
+      .on(`${props.msgIn}com`, (msg) => {
+        this.setState({ commentLabel: msg })
+      })
+  }
+
+  componentWillUnmount() {
+    this.props.emitter.removeAllListeners(this.props.msgIn)
+    this.props.emitter.removeAllListeners(`${this.props.msgIn}com`)
+  }
+
+  render() {
+    return (
+      <View style={[this.props.style, stylesElem.container]}>
+      <Pressable style={stylesElem.pressableZone}
+        onPress={() => {
+          this.props.emitter.emit(this.props.msgOut)
+        }}>
+        <View style={stylesElem.inner}>
+          <Text style={stylesElem.mainText}>{this.state.mainLabel}</Text>
+          <Text style={stylesElem.commentText}>{this.state.commentLabel}</Text>
+        </View>
+      </Pressable>
+      </View >
+    )
+  }
+}
+
+export default Button

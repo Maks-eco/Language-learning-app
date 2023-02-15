@@ -1,120 +1,100 @@
-import { storeData, getData } from './localStorage';
-let promiseGoogleSheet = require('./gsheetData').promiseDataGsheet
+import { storeData, getData } from './localStorage'
 
-export let dataGlobDictionary = [
-    {la: "말이 없습니다", tr: "no words", co: "mal-i eobs-seubnida"}, 
-    {la: "말이 없습니다", tr: "no words", co: "mal-i eobs-seubnida"}, 
-    {la: "말이 없습니다", tr: "no words", co: "mal-i eobs-seubnida"}, 
-    {la: "말이 없습니다", tr: "no words", co: "mal-i eobs-seubnida"}, 
-    {la: "말이 없습니다", tr: "no words", co: "mal-i eobs-seubnida"}, 
-    {la: "말이 없습니다", tr: "no words", co: "mal-i eobs-seubnida"}, 
-    {la: "말이 없습니다", tr: "no words", co: "mal-i eobs-seubnida"}, 
-    {la: "말이 없습니다", tr: "no words", co: "mal-i eobs-seubnida"}, 
-    {la: "말이 없습니다", tr: "no words", co: "mal-i eobs-seubnida"}, 
-    {la: "말이 없습니다", tr: "no words", co: "mal-i eobs-seubnida"}, 
-    {la: "말이 없습니다", tr: "no words", co: "mal-i eobs-seubnida"}, 
-    {la: "말이 없습니다", tr: "no words", co: "mal-i eobs-seubnida"}, 
-  ]
+const promiseGoogleSheet = require('./gsheetData').promiseDataGsheet
+
+export let dataGlobDictionary = Array(10).fill(
+  { la: '말이 없습니다', tr: 'no words', co: 'mal-i eobs-seubnida' },
+)
 
 export let dataGlobSettings = {
-  current_lang:'kor',
-  kor:{min:0,max:10},
-  eng:{min:0,max:10},
-  hide:'bth',
+  currentLang: 'kor',
+  kor: { min: 0, max: 10, list: '' },
+  eng: { min: 0, max: 10, list: '' },
+  hide: 'bth',
   table: '',
   key: '',
-  list: '',
 }
 
-function checkUserInput(){
-  let undArr = [] 
-  for(const item of arguments){
+function checkUserInput() {
+  const undArr = []
+  for (const item of arguments) {
     undArr.push(void 0)
   }
-  try{
+  try {
     let existEmpty = false
-    for(const item of arguments){
-      if (!item || item == '' ) existEmpty = true
+    for (const item of arguments) {
+      if (!item || item == '') existEmpty = true
     }
-    if (existEmpty){       
+    if (existEmpty) {
       return undArr
-    } else {
-     return arguments
     }
-  }catch (e){
+    return arguments
+  } catch (e) {
     console.log(e)
     return undArr
-  }   
+  }
 }
 
-async function init(){
+async function init() {
   getData('dictionary')
-    .then((res) =>{  dataGlobDictionary = JSON.parse( res)  })
+    .then((res) => { dataGlobDictionary = JSON.parse(res) })
     .then(() => getData('settings'))
-    .then((res) =>{ 
-      dataGlobSettings = JSON.parse( res)
+    .then((res) => {
+      dataGlobSettings = JSON.parse(res)
 
-      let chnk = JSON.parse(res)          
-      const [table, key, list] = checkUserInput(chnk.table, chnk.key, chnk.list)
-      // console.log(table, key, list)
-      promiseGoogleSheet(chnk.current_lang, table, key, list)
-        .then((msg)=>{
-          storeData('dictionary', msg);
-          dataGlobDictionary = JSON.parse( msg)
-        /* console.log('ok')*/
+      const chnk = JSON.parse(res)
+      const [table, key, list] = checkUserInput(chnk.table, chnk.key, chnk[chnk.currentLang].list)
+
+      promiseGoogleSheet(chnk.currentLang, table, key, list)
+        .then((msg) => {
+          storeData('dictionary', msg)
+          dataGlobDictionary = JSON.parse(msg)
         })
-        .catch((e)=>{
+        .catch((e) => {
           console.log(e)
-        })      
+        })
     })
-    .catch(e => {
-      // console.log(e.name)
-      storeData('settings', JSON.stringify(dataGlobSettings  ))
-        .then(()=>  storeData('dictionary', JSON.stringify(dataGlobDictionary  )))        
-        .then(()=> {
+    .catch((e) => {
+      storeData('settings', JSON.stringify(dataGlobSettings))
+        .then(() => storeData('dictionary', JSON.stringify(dataGlobDictionary)))
+        .then(() => {
           console.log('secnd attempt')
           init()
-        })      
-    })    
-}  
+        })
+    })
+}
 init()
 
-
-function sendScope(){
-  return new Promise((resolve) => {    
-    Promise.all([      
-      //ert(),
-      getData('dictionary'), 
-      getData('settings')
+function sendScope() {
+  return new Promise((resolve) => {
+    Promise.all([
+      getData('dictionary'),
+      getData('settings'),
     ])
-    .then(results => {
-      dataGlobDictionary = JSON.parse( results[0])
-      dataGlobSettings = JSON.parse( results[1])
-      // console.log(dataGlobSettings)
-       resolve({dict: results[0], sets: results[1]})
-    })
-    .catch(() => {
-      // console.log(e)
-      storeData('dictionary', JSON.stringify(dataGlobDictionary /*dataGlob.dictionary */))
-        .then(() => {
-          storeData('settings', JSON.stringify(dataGlobSettings /*dataGlob.settings*/ ))
-        })
-        .then(() =>   sendScope() )
-        .then(results => {
-          console.log('double rebuilded')
-          resolve(results)
-        })
-    })
+      .then((results) => {
+        dataGlobDictionary = JSON.parse(results[0])
+        dataGlobSettings = JSON.parse(results[1])
+        resolve({ dict: results[0], sets: results[1] })
+      })
+      .catch(() => {
+        storeData('dictionary', JSON.stringify(dataGlobDictionary))
+          .then(() => {
+            storeData('settings', JSON.stringify(dataGlobSettings))
+          })
+          .then(() => sendScope())
+          .then((results) => {
+            console.log('double rebuilded')
+            resolve(results)
+          })
+      })
   })
 }
 
-
-function sendScopeSettings(e){ //get data from input element from settings, then save it in localStorage
-   // console.log(e)
-   let data = JSON.parse(e)
-   if (data[data.current_lang].max < 3) data[data.current_lang].max = 3
-   e = JSON.stringify(data)
-  storeData('settings', e).then(() => init()  )
+function sendScopeSettings(value) { // get data from input element from settings, then save it in localStorage
+  const data = JSON.parse(value)
+  if (data[data.currentLang].max < 3) data[data.currentLang].max = 3
+  const newValue = JSON.stringify(data)
+  storeData('settings', newValue).then(() => init())
 }
 
 export { sendScopeSettings, sendScope }
