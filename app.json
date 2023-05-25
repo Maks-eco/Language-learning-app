@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "test-new-awes-app-piuw-piuw",
+    "name": "TrainingApp",
     "slug": "test-new-awes-app-piuw-piuw",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -25,7 +25,7 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
       },
-      "package": "com.maksk.testnewawesapppiuwpiuw"
+      "package": "com.maksk.trainingapp"
     },
     "web": {
       "favicon": "./assets/favicon.png"

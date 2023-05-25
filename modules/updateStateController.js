@@ -59,7 +59,7 @@ async function init() {
         .then(() => storeData('dictionary', JSON.stringify(dataGlobDictionary)))
         .then(() => {
           console.log('secnd attempt')
-          init()
+          setTimeout(() => init(), 1000)
         })
     })
 }

@@ -62,7 +62,8 @@ const styleSets = StyleSheet.create({
     margin: 6,
     borderColor: '#ffffff77',
     borderWidth: 1,
-    padding: 10,
+    // padding: 10,
+    padding: 2,
     fontWeight: 'bold',
     marginTop: 0,
   },
@@ -154,7 +155,7 @@ class SetsInterf extends Component {
 
 const ShowPlot = (props) => {
   const [varData, onChangeData] = React.useState([])
-  const maxLen = props.settingsData[props.settingsData.currentLang].max
+  const maxLen = props?.settingsData?.[props.settingsData.currentLang]?.max
 
   props.intEmitter.on(props.msgIn, (obj) => {
     onChangeData(obj)
@@ -194,11 +195,11 @@ const ShowPlot = (props) => {
 
 const SetsInput = (props) => {
   let number
-  if (props.textInputType && !props.scriptDependent) {
-    number = props.settingsData[props.name]
+  if (props?.textInputType && !props?.scriptDependent) {
+    number = props?.settingsData?.[props?.name]
     if (number && number !== '') number = number.toString()
   } else {
-    number = props.settingsData[props.settingsData.currentLang][props.name].toString()
+    number = props?.settingsData?.[props?.settingsData?.currentLang]?.[props?.name].toString()
   }
 
   function returnValueToParent(e) {
@@ -213,15 +214,15 @@ const SetsInput = (props) => {
       if (eventInt > props.maxnumber) return
     }
 
-    const bufSettings = props.settingsData
-    if (props.scriptDependent) bufSettings[bufSettings.currentLang][props.name] = eventInt
-    else bufSettings[props.name] = eventInt
+    const bufSettings = props?.settingsData
+    if (props?.scriptDependent) bufSettings[bufSettings.currentLang][props?.name] = eventInt
+    else bufSettings[props?.name] = eventInt
     returnValueToParent(JSON.stringify(bufSettings))
   }
 
-  const legendView = props.textInputType ? styleSets.legendGsheet : styleSets.legendTopBlock
-  const inputView = props.textInputType ? styleSets.inputGsheet : styleSets.inputTopBlock
-  const kboardtype = props.textInputType ? 'text' : 'numeric'
+  const legendView = props?.textInputType ? styleSets.legendGsheet : styleSets.legendTopBlock
+  const inputView = props?.textInputType ? styleSets.inputGsheet : styleSets.inputTopBlock
+  const kboardtype = props?.textInputType ? 'text' : 'numeric'
 
   return (
     <SafeAreaView>
