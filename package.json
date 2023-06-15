@@ -6,26 +6,30 @@
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "expo-build": "eas login & eas build -p android --profile preview2"
   },
   "dependencies": {
-    "@expo/webpack-config": "^18.0.4",
-    "@google-cloud/local-auth": "^2.1.0",
-    "@react-native-async-storage/async-storage": "^1.17.11",
-    "expo": "^46.0.6",
+    "@expo/vector-icons": "^13.0.0",
+    "@expo/webpack-config": "^18.1.0",
+    "@react-native-async-storage/async-storage": "1.17.11",
+    "expo": "^48.0.7",
+    "expo-font": "~11.1.1",
+    "expo-splash-screen": "~0.18.1",
     "expo-status-bar": "~1.4.2",
-    "googleapis": "^105.0.0",
-    "http2": "^3.3.7",
-    "react": "18.1.0",
-    "react-dom": "18.1.0",
-    "react-native": "0.70.5",
-    "react-native-web": "~0.18.9"
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "react-native": "0.71.8",
+    "react-native-elements": "^3.4.2",
+    "react-native-safe-area-context": "4.5.0",
+    "react-native-web": "~0.18.7"
   },
   "devDependencies": {
-    "@babel/core": "^7.12.9",
+    "@babel/core": "^7.19.3",
     "eslint": "^8.34.0",
     "eslint-config-airbnb-base": "^15.0.0",
-    "eslint-plugin-react": "^7.32.2"
+    "eslint-plugin-react": "^7.32.2",
+    "prettier": "2.8.8"
   },
   "private": true
 }

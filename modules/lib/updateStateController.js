@@ -2,9 +2,11 @@ import { storeData, getData } from './localStorage'
 
 const promiseGoogleSheet = require('./gsheetData').promiseDataGsheet
 
-export let dataGlobDictionary = Array(10).fill(
-  { la: '말이 없습니다', tr: 'no words', co: 'mal-i eobs-seubnida' },
-)
+export let dataGlobDictionary = Array(10).fill({
+  la: '말이 없습니다',
+  tr: 'no words',
+  co: 'mal-i eobs-seubnida',
+})
 
 export let dataGlobSettings = {
   currentLang: 'kor',
@@ -37,7 +39,9 @@ function checkUserInput() {
 
 async function init() {
   getData('dictionary')
-    .then((res) => { dataGlobDictionary = JSON.parse(res) })
+    .then((res) => {
+      dataGlobDictionary = JSON.parse(res)
+    })
     .then(() => getData('settings'))
     .then((res) => {
       dataGlobSettings = JSON.parse(res)
@@ -59,7 +63,7 @@ async function init() {
         .then(() => storeData('dictionary', JSON.stringify(dataGlobDictionary)))
         .then(() => {
           console.log('secnd attempt')
-          setTimeout(() => init(), 1000)
+          // setTimeout(() => init(), 1000)
         })
     })
 }
@@ -67,10 +71,7 @@ init()
 
 function sendScope() {
   return new Promise((resolve) => {
-    Promise.all([
-      getData('dictionary'),
-      getData('settings'),
-    ])
+    Promise.all([getData('dictionary'), getData('settings')])
       .then((results) => {
         dataGlobDictionary = JSON.parse(results[0])
         dataGlobSettings = JSON.parse(results[1])
@@ -90,7 +91,8 @@ function sendScope() {
   })
 }
 
-function sendScopeSettings(value) { // get data from input element from settings, then save it in localStorage
+function sendScopeSettings(value) {
+  // get data from input element from settings, then save it in localStorage
   const data = JSON.parse(value)
   if (data[data.currentLang].max < 3) data[data.currentLang].max = 3
   const newValue = JSON.stringify(data)

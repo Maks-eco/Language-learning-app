@@ -13,7 +13,9 @@ async function funcFunc(langCurr, link, key, listNameTable) {
     resData.forEach((row) => {
       dictArray.push({ la: row[0], tr: row[1], co: row[2] })
     })
-    if (dictArray.length < 3) { throw new Error('Array too small') }
+    if (dictArray.length < 3) {
+      throw new Error('Array too small')
+    }
     const datsss = JSON.stringify(dictArray)
     return datsss
   } catch (e) {

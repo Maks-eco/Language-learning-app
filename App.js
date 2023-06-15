@@ -5,8 +5,8 @@ import {
 import React, { Component } from 'react'
 import Button from './modules/mainScreenBlock'
 import SetsInterf from './modules/settingsInputs'
-import { interfaceEmitter, scopeSetts } from './modules/lessonGenerator'
-import { sendScopeSettings } from './modules/updateStateController'
+import { interfaceEmitter, scopeSetts } from './modules/lib/lessonGenerator'
+import { sendScopeSettings } from './modules/lib/updateStateController'
 
 const intEmitter = interfaceEmitter
 const scopeSets = scopeSetts
@@ -68,19 +68,31 @@ class App extends Component {
   }
 
   changePage() {
-    this.setState({ page: (this.state.page === 'sets') ? 'main' : 'sets' })
+    this.setState({ page: this.state.page === 'sets' ? 'main' : 'sets' })
   }
 
   render() {
     if (this.state.page === 'main') {
       return (
         <View style={styles.container}>
-          <Button style={styles.original} emitter={intEmitter}
-            msgIn="shtwords1lang" msgOut="showWord" />
-          <Button style={styles.translation} emitter={intEmitter}
-            msgIn="shtwords2tran" msgOut="showWord" />
-          <Button style={styles.nextWord} emitter={intEmitter}
-            msgIn="shtwords3next" msgOut="nextWord" />
+          <Button
+            style={styles.original}
+            emitter={intEmitter}
+            msgIn="shtwords1lang"
+            msgOut="showWord"
+          />
+          <Button
+            style={styles.translation}
+            emitter={intEmitter}
+            msgIn="shtwords2tran"
+            msgOut="showWord"
+          />
+          <Button
+            style={styles.nextWord}
+            emitter={intEmitter}
+            msgIn="shtwords3next"
+            msgOut="nextWord"
+          />
           <View style={styles.setsCont}>
             <Setst style={styles.link} changePage={this.changePage} />
           </View>
@@ -92,10 +104,10 @@ class App extends Component {
     return (
       <View style={styles.container}>
         <SetsInterf
-        scope={scopeSets()}
-        // onIntInpTap={this.setsInterfFromInp}
-        onIntChoTap={this.setsInterfFromInp}
-        intEmitter={intEmitter}
+          scope={scopeSets()}
+          // onIntInpTap={this.setsInterfFromInp}
+          onIntChoTap={this.setsInterfFromInp}
+          intEmitter={intEmitter}
         />
         <View style={styles.setsCont}>
           <Setst style={styles.link} changePage={this.changePage} />
@@ -112,10 +124,7 @@ class UpdView extends Component {
   }
 
   render() {
-    return (
-      <View>
-      </View>
-    )
+    return <View></View>
   }
 }
 
@@ -131,9 +140,7 @@ class Setst extends Component {
 
   render() {
     return (
-      <Pressable
-      style={styles.prsbl}
-      onPress={this.handEvenPrs}>
+      <Pressable style={styles.prsbl} onPress={this.handEvenPrs}>
         <View style={styles.link}>
           <Image source={require('./assets/sets_star_wt.png')} style={styles.img} />
         </View>
