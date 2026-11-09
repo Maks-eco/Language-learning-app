@@ -17,7 +17,7 @@ An intuitive mobile application for expanding vocabulary using smart spaced repe
 
 ### Quick Start & Setup
 
-1. Generate a Google Sheets API key via [Google Sheets API Guide](https://handsondataviz.org).
+1. Generate a Google Sheets API key via [Google Sheets API Guide](https://handsondataviz.org/google-sheets-api-key.html), [Guide 2](https://docs.rbsoft.ru/how-to-get-keys-credentials-json-for-accessing-google-sheets-api).
 2. Configure your app settings using these credentials:
 
 ```env
@@ -47,7 +47,7 @@ Built with **Expo Go** for cross-platform performance.
 
 ### Быстрый старт и настройка
 
-1. Получите API-ключ по инструкции [Google Sheets API Guide](https://handsondataviz.org).
+1. Получите API-ключ по инструкции [Google Sheets API Guide](https://handsondataviz.org/google-sheets-api-key.html), [Guide 2](https://docs.rbsoft.ru/how-to-get-keys-credentials-json-for-accessing-google-sheets-api).
 2. Заполните параметры в настройках приложения:
 
 ```env
